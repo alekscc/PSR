@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ReferenceGroup xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema" ID="6a34d9b2-bbc1-4bf9-857d-878becfbf08d" xmlns="urn:schemas-microsoft-com:xml-wcfservicemap">
+  <ClientOptions>
+    <GenerateAsynchronousMethods>false</GenerateAsynchronousMethods>
+    <EnableDataBinding>true</EnableDataBinding>
+    <ExcludedTypes />
+    <ImportXmlTypes>false</ImportXmlTypes>
+    <GenerateInternalTypes>false</GenerateInternalTypes>
+    <GenerateMessageContracts>false</GenerateMessageContracts>
+    <NamespaceMappings />
+    <CollectionMappings />
+    <GenerateSerializableTypes>true</GenerateSerializableTypes>
+    <Serializer>Auto</Serializer>
+    <UseSerializerForFaults>true</UseSerializerForFaults>
+    <ReferenceAllAssemblies>true</ReferenceAllAssemblies>
+    <ReferencedAssemblies />
+    <ReferencedDataContractTypes />
+    <ServiceContractMappings />
+  </ClientOptions>
+  <MetadataSources>
+    <MetadataSource Address="http://localhost:8001/DuplexService/" Protocol="http" SourceId="1" />
+  </MetadataSources>
+  <Metadata>
+    <MetadataFile FileName="item3.xsd" MetadataType="Schema" ID="ac137d71-ceff-4754-9434-2ac89239ee3a" SourceId="1" SourceUrl="http://localhost:8001/DuplexService/?xsd=xsd3" />
+    <MetadataFile FileName="item2.xsd" MetadataType="Schema" ID="4fbc9ff7-8dde-46d5-a46f-d6ab80b1c4d8" SourceId="1" SourceUrl="http://localhost:8001/DuplexService/?xsd=xsd2" />
+    <MetadataFile FileName="item.disco" MetadataType="Disco" ID="f4d3fbad-39cd-424a-920e-ff5235af35c2" SourceId="1" SourceUrl="http://localhost:8001/DuplexService/?disco" />
+    <MetadataFile FileName="item.xsd" MetadataType="Schema" ID="3f910446-a056-4107-b5d9-3094ca2e1535" SourceId="1" SourceUrl="http://localhost:8001/DuplexService/?xsd=xsd0" />
+    <MetadataFile FileName="Duplex.wsdl" MetadataType="Wsdl" ID="b2153e4a-fb57-4fdd-96c7-c6c4098627b0" SourceId="1" SourceUrl="http://localhost:8001/DuplexService/?wsdl" />
+    <MetadataFile FileName="item1.xsd" MetadataType="Schema" ID="65a206e8-3c26-4283-9077-040688b032cf" SourceId="1" SourceUrl="http://localhost:8001/DuplexService/?xsd=xsd1" />
+  </Metadata>
+  <Extensions>
+    <ExtensionFile FileName="configuration91.svcinfo" Name="configuration91.svcinfo" />
+    <ExtensionFile FileName="configuration.svcinfo" Name="configuration.svcinfo" />
+  </Extensions>
+</ReferenceGroup>
