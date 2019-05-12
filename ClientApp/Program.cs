@@ -18,6 +18,7 @@ namespace ClientApp
     class Program
     {
         public static ManualResetEvent mre = new ManualResetEvent(false);
+        public static ManualResetEvent mre2 = new ManualResetEvent(false);
 
         public class CallbackHandler : IDuplexCallback
         {
@@ -27,7 +28,7 @@ namespace ClientApp
             private BestResult bestResult;
             private bool isBestResult = false;
             private bool mutStatus = false;
-         
+            private bool isDone = false;
             
   
 
@@ -74,6 +75,10 @@ namespace ClientApp
             public void StartWork()
             {
 
+                mre2.Set();
+                mre2.Reset();
+
+                isDone = false;
                 if(this.matrix==null)
                 {
                     Console.WriteLine("matrix is empty, quitting");
@@ -106,7 +111,12 @@ namespace ClientApp
                 //mut.WaitOne();
                 //SecuredSingleton.GetInstance().Wait();
                 //mut.WaitOne();
-                Console.WriteLine("Join Accepted");
+                IsDone = true;
+                mre.Set();
+                mre.Reset();
+
+                mre2.Set();
+                mre2.Reset();
 
             }
 
@@ -129,6 +139,7 @@ namespace ClientApp
                 }
             }
 
+            public bool IsDone { get => isDone; set => isDone = value; }
         }
      
 
@@ -187,15 +198,23 @@ namespace ClientApp
             //if (!callbackHandler.WaitForTask()) Console.WriteLine("mutex błąd");
 
             //SecuredSingleton.GetInstance().Wait();
-            mre.WaitOne();
-            //mut.WaitOne();
-            //EventWaitHandle.SignalAndWait()
-            if (callbackHandler.IsBestResult)
-            {
-                if(isDelayed) Thread.Sleep(10000);
-                client.SendResult(callbackHandler.ClientData);
-            }
 
+            do
+            {
+
+                mre.WaitOne();
+                //mut.WaitOne();
+                //EventWaitHandle.SignalAndWait()
+                if (callbackHandler.IsBestResult)
+                {
+                    if (isDelayed) Thread.Sleep(10000);
+                    client.SendResult(callbackHandler.ClientData);
+                }
+
+                mre2.WaitOne();
+                //Thread.Sleep(2000);
+
+            } while (!callbackHandler.IsDone);
             // callbackHandler.TaskDone();
 
             // SecuredSingleton.GetInstance().Release();

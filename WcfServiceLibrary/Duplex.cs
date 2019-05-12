@@ -56,7 +56,7 @@ namespace WcfServiceLibrary
                 data.bestVertice = -1;
                 listOfClients.Add(data);
                 callback.Message("Dołączyłeś do hosta.");
-                callback.JoinAccept();
+                //callback.JoinAccept();
                 return data;
             }
             Console.WriteLine("returning null");
@@ -155,16 +155,17 @@ namespace WcfServiceLibrary
         }
         private void Brief(int numberOfthreads,int matrixSize,int[] arrSource)
         {
+            Console.WriteLine("Briefing");
             int numberOfClients = listOfClients.Count;
             //int matrixSize = matrix.Length;
             int[] verticesPerClient = new int[numberOfClients];
 
-            double ratio = (double)matrixSize / numberOfClients;
+            double ratio = (double)arrSource.Length / numberOfClients;
             bool extraVertice = false;
             int vertices = (int)ratio;
             if (ratio % 1 != 0) extraVertice = true;
-
-            for(int i=0;i<numberOfClients;i++)
+            Console.WriteLine("Number of vertices per client:");
+            for (int i=0;i<numberOfClients;i++)
             {
                 verticesPerClient[i] = vertices;
 
@@ -172,7 +173,7 @@ namespace WcfServiceLibrary
                 {
                     verticesPerClient[i]+=1;
                 }
-                Console.WriteLine("{0} num of verts = {1}",i, verticesPerClient[i]);
+                Console.WriteLine("{0};{1}",i, verticesPerClient[i]);
             }
 
             for (int i=0;i< numberOfClients; i++)
@@ -182,12 +183,12 @@ namespace WcfServiceLibrary
                 c.listOfVertices = getSubArrayOfVertices(arrSource,(i==0) ? 0: verticesPerClient[i - 1] * i,verticesPerClient[i]);//getListOfVertices((i == 0) ? 0 : verticesPerClient[i - 1]*i, verticesPerClient[i]);
 
                 int iip = 0;
-                Console.WriteLine("THREAD {0}", c.id);
+                Console.Write("THREAD {0}: ", c.id);
                 foreach (int ii in c.listOfVertices)
                 { 
-                    Console.WriteLine("{0} vert: {1}", iip++, ii);
+                    Console.Write("{0};", ii);
                 }
-                
+                Console.WriteLine();
                 try
                 {
                     c.Callback.Test();
@@ -214,7 +215,7 @@ namespace WcfServiceLibrary
         }
         private void OnTimeEvent(object source, System.Timers.ElapsedEventArgs e)
         {
-            Console.WriteLine("timeout");
+            Console.WriteLine("Timeout - start");
             System.Timers.Timer tm = source as System.Timers.Timer;
             tm.Enabled = false;
             List<int> listOfLostVertices = new List<int>();
@@ -234,11 +235,13 @@ namespace WcfServiceLibrary
             }
             Console.WriteLine();
 
-           Brief(1,matrix.Length,listOfLostVertices.ToArray());
-           Execute();
+            Brief(1,matrix.Length,listOfLostVertices.ToArray());
+            Execute();
+            Console.WriteLine("Timeout - end");
         }
         public void Execute()
         {
+            Console.WriteLine("Count of clients:{0}", listOfClients.Count);
             for(int i=0;i<listOfClients.Count;i++)
             {
                 ClientData c = listOfClients[i];
@@ -246,6 +249,7 @@ namespace WcfServiceLibrary
                 try
                 {
                     c.Callback.SendData(c);
+                    Console.WriteLine("Wysłano do {0}",c.Identifier);
                 }
                 catch(TimeoutException toe)
                 {
@@ -327,8 +331,12 @@ namespace WcfServiceLibrary
                     if (++numberOfClientsDone == listOfClients.Count)
                     {
                         timer.Enabled = false;
+                        foreach(ClientData c in listOfClients)
+                        {
+                            c.Callback.JoinAccept();
+                        }
                     }
-
+                    Console.WriteLine(numberOfClientsDone + "/" + listOfClients.Count);
 
                     return;
                 }
