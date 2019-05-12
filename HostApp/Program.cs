@@ -19,13 +19,17 @@ namespace HostApp
             ServiceHost selfHost = new ServiceHost(typeof(Duplex),
                                                     baseAddress);
 
+            Console.WriteLine("Adres hosta:{0}", selfHost.BaseAddresses[0]);
 
             try
             {
-                
+
+                WSDualHttpBinding binding = new WSDualHttpBinding();
+                binding.Security.Mode = WSDualHttpSecurityMode.None;
 
                 selfHost.AddServiceEndpoint(typeof(IDuplex),
-                    new WSDualHttpBinding(), "DuplexService");
+                    binding, "DuplexService");
+
                 ServiceMetadataBehavior smb = new ServiceMetadataBehavior();
                 smb.HttpGetEnabled = true;
 
@@ -52,13 +56,15 @@ namespace HostApp
                     }
                     else if(cmd.CompareTo("join")==0)
                     {
-                        instance.SetStage(STAGE_TYPE.JOIN);
+                        //instance.SetStage(STAGE_TYPE.JOIN);
+                        instance.JoinClients();
                     }
                     else if(cmd.CompareTo("datasync")==0)
                     {
                         Graph graph = new Graph(@"../../macierz.txt");
                         instance.SetMatrix(graph.matrix);
-                        instance.SetStage(STAGE_TYPE.DATA_SYNC);
+                        //instance.SetStage(STAGE_TYPE.DATA_SYNC);
+                        instance.SyncClientsData();
                     }
                     else if(cmd.CompareTo("brief")==0)
                     {
@@ -66,9 +72,9 @@ namespace HostApp
                         string line = Console.ReadLine();
                         int num = int.Parse(line);
 
-                        instance.Brief(num);
+                        instance.BriefAllClients(num);
                     }
-                    else if(cmd.CompareTo("execute")==0)
+                    else if(cmd.CompareTo("start")==0)
                     {
                         Console.WriteLine("Uruchamiam algorytm u klientów");
                         instance.Execute();

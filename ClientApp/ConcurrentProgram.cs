@@ -59,7 +59,7 @@ namespace ClientApp
 
         private void doChildWork(int vertice)  // operacje na wątku
         {
-            int lowestDist = 9999;
+            int lowestDist = 99999;
 
             do
             {

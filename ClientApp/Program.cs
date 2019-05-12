@@ -27,6 +27,7 @@ namespace ClientApp
             private BestResult bestResult;
             private bool isBestResult = false;
             private bool mutStatus = false;
+         
             
   
 
@@ -129,16 +130,40 @@ namespace ClientApp
             }
 
         }
-        
+     
+
         static void Main(string[] args)
         {
             CallbackHandler callbackHandler = new CallbackHandler();
             InstanceContext instanceContext = new InstanceContext(callbackHandler);
+            bool isDelayed = false;
 
-            Console.WriteLine("Trwa nawiązywanie połączenia z hostem.");
+
+
+            Console.Write("Adress:");
             DuplexClient client = new DuplexClient(instanceContext);
+
+            string input;
+            //EndpointAddress endpoint = new EndpointAddress(new Uri("http://localhost:8001/DuplexService/DuplexService/"));
+            input = Console.ReadLine();
+            Console.WriteLine();
+            if(input.CompareTo("/d")==0)
+            {
+                isDelayed = true;
+            }
+            else if (input.CompareTo("/")!=0)
+            {
+                Uri uri = new Uri("http://" + input + "/DuplexService/DuplexService/");
+                client.Endpoint.Address = new EndpointAddress(uri);
+                Console.WriteLine("URI:" + client.Endpoint.Address);
+            }
+
             
+
+     
+            Console.WriteLine("Trwa nawiązywanie połączenia z hostem.");
             client.Open();
+            
            
             //int[][] matrix = client.GetMatrixData();
 
@@ -167,9 +192,9 @@ namespace ClientApp
             //EventWaitHandle.SignalAndWait()
             if (callbackHandler.IsBestResult)
             {
+                if(isDelayed) Thread.Sleep(10000);
                 client.SendResult(callbackHandler.ClientData);
             }
-            Console.WriteLine("Koncze zadanie");
 
             // callbackHandler.TaskDone();
 
