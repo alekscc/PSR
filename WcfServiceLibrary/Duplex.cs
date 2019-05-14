@@ -48,7 +48,7 @@ namespace WcfServiceLibrary
         {
             if (stage == STAGE_TYPE.JOIN)
             {
-                Console.WriteLine("Dołączył nowy klient - {0}.",name);
+                Printer.PrintInfo("Dołączył nowy klient - " + name);
                 IDuplexCallback callback = OperationContext.Current.GetCallbackChannel<IDuplexCallback>();
                 ClientData data = new ClientData(name, listOfClients.Count, 2, null);
                 data.Callback = callback;
@@ -59,9 +59,10 @@ namespace WcfServiceLibrary
                 //callback.JoinAccept();
                 return data;
             }
-            Console.WriteLine("returning null");
+            Printer.PrintErr("Błąd połączenia z klientem");
             return null;
         }
+            
         public void SetMatrix(int[][] matrix)
         {
             this.matrix = matrix;
@@ -88,7 +89,8 @@ namespace WcfServiceLibrary
         public void SyncAllClientsData()
         {
             int len = this.matrix.Length;
-            Console.WriteLine("Rozmiar macierzy:{0}", len);
+         
+            Printer.PrintInfo("Synchronizacja macierzy: "+ len);
             for(int i=0;i<listOfClients.Count;i++)
             {
 
@@ -96,8 +98,10 @@ namespace WcfServiceLibrary
                  try
                  {
                     Console.Write("{0}: ", c.name);
+                    // start czasu przessylania danych
                     if (len == c.Callback.DataSync(this.matrix))
                     {
+                        // stop czasu przessylania danych
                         Console.WriteLine("OK");
                         c.IsDataReady = true;
 
@@ -117,7 +121,7 @@ namespace WcfServiceLibrary
         }
         public void Stats()
         {
-            Console.WriteLine("NAME \t\t\t ID \t DATASYNC \t THREADS \t VERTICEID \t WYNIK");
+            Console.WriteLine("NAME \t\t\t ID \t DATASYNC \t THREADS \t VERTICEID \t DISTANCE");
             foreach(ClientData c in listOfClients)
             {
                 Console.WriteLine("{0} \t {1} \t {2} \t\t {3} \t\t {4} \t\t {5}", c.Name,c.Identifier,c.IsDataReady,c.NumberOfThreads,c.VerticeId,c.VerticeDist);
@@ -242,6 +246,7 @@ namespace WcfServiceLibrary
         public void Execute()
         {
             Console.WriteLine("Count of clients:{0}", listOfClients.Count);
+            // start algorytmu
             for(int i=0;i<listOfClients.Count;i++)
             {
                 ClientData c = listOfClients[i];
@@ -249,15 +254,15 @@ namespace WcfServiceLibrary
                 try
                 {
                     c.Callback.SendData(c);
-                    Console.WriteLine("Wysłano do {0}",c.Identifier);
+                    Console.WriteLine("Wysłano do {0}", c.Identifier);
                 }
-                catch(TimeoutException toe)
+                catch (TimeoutException toe)
                 {
                     Console.WriteLine("{0}: Utracono połączenie, usunięcie z listy.", c.Name);
                 }
-                catch(CommunicationException cex)
+                catch (CommunicationException cex)
                 {
-                    Console.WriteLine("{0}:BłĄD CEX", c.name);
+                    Printer.PrintWarn("Błąd komunikacji");
                 }
                 
             }
@@ -277,7 +282,7 @@ namespace WcfServiceLibrary
         }
         public void SyncClientsData()
         {
-            Console.WriteLine("Service: Data synchronization");
+            Printer.PrintInfo("Service: Data synchronized");
             if (isMatrixReady)
             {
                 stage = STAGE_TYPE.DATA_SYNC;
@@ -335,6 +340,7 @@ namespace WcfServiceLibrary
                         {
                             c.Callback.JoinAccept();
                         }
+                        // koniec algorytmu
                     }
                     Console.WriteLine(numberOfClientsDone + "/" + listOfClients.Count);
 

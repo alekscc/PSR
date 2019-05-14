@@ -6,6 +6,12 @@ using System.Threading.Tasks;
 
 namespace ClientApp
 {
+    public struct Record
+    {
+        public int vertice;
+        public int distance;
+    }
+
     // klasa do przechowywania danych współdzielonych między wątkami
     class SharedGraphData
     {
@@ -13,7 +19,9 @@ namespace ClientApp
         private int[] vertices;
         private int curVertice;
         private int size;
-        private int lowestDist = 99999;
+        //private int lowestDist = 99999;
+       // private int verticeNum = -1;
+        private Record record;
         private readonly object block = new object();
 
         public int[][] Matrix
@@ -47,21 +55,28 @@ namespace ClientApp
                 return size;
             }
         }  
-        public int Dist
+        public void SetRecord(int vert,int dist)
         {
-            set
+            lock (block)
             {
-                lock (block)
-                {
-                    lowestDist = (lowestDist > value) ? value : lowestDist;
-                }
-            }
-            get
-            {
-                return lowestDist;
+                record.distance = dist;
+                record.vertice = vert;
             }
         }
-
+        public int RecordVertice
+        {
+            get
+            {
+                return record.vertice;
+            }
+        }
+        public int RecordDistance
+        {
+            get
+            {
+                return record.distance;
+            }
+        }
 
         public SharedGraphData(int [][] matrix,int[] vertices)
         {
@@ -74,7 +89,7 @@ namespace ClientApp
 
             if(this.vertices==null)
             {
-                Console.WriteLine("vertices is null");
+                Console.WriteLine("vertices are null");
             }
          
         }

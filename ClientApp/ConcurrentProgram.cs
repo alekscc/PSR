@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading;
 
 
+
 namespace ClientApp
 {
     class ConcurrentProgram
@@ -12,11 +13,18 @@ namespace ClientApp
         private int numberOfThreads;
         private SharedGraphData sharedGraph;
 
-        public int BestResult
+        public int RecordResult
         {
             get
             {
-                return sharedGraph.Dist;
+                return sharedGraph.RecordDistance;
+            }
+        }
+        public int RecordVertice
+        {
+            get
+            {
+                return sharedGraph.RecordVertice;
             }
         }
 
@@ -35,8 +43,13 @@ namespace ClientApp
 
  
                 Thread[] threads = new Thread[this.numberOfThreads];
-
+                // czas wyknania algorytmu dla klienta
                 var watch = System.Diagnostics.Stopwatch.StartNew();
+
+                DateTime start = DateTime.Now;
+            DateTime stop;
+            TimeSpan interval;
+
                 for (int i = 0; i < numberOfThreads; i++)
                 {
 
@@ -51,32 +64,73 @@ namespace ClientApp
 
                 }
                 watch.Stop();
+            stop = DateTime.Now;
+            interval = stop - start;
+            long czas = interval.Ticks * 100;
                 var elapsedMiliseconds = watch.ElapsedMilliseconds;
-                Console.WriteLine("Total time:" + elapsedMiliseconds + "ms");
-
+                Console.WriteLine("Total time:" + elapsedMiliseconds + "ms "+czas);
+            // czas wyknania algorytmu dla klienta - koniec
 
         }
+        private int runDijkstraAlghoritm(int vertice)
+        {
 
+            
+            int[] sum = DijkstraAlgorithm.Dijkstra(sharedGraph.Matrix, vertice, sharedGraph.MatrixSize);
+        
+            return sum.Sum();
+        }
+        private void doChildWork(int vertice)
+        {
+            int recordVert = vertice;
+            int recordDist = runDijkstraAlghoritm(vertice);
+
+            vertice = sharedGraph.GetNextVertice;
+
+            while (vertice >= 0)
+            {
+                int sum = runDijkstraAlghoritm(vertice);
+                Console.WriteLine("Łączna długość najkrótszych ścieżek: " + "wierzchołek:" + vertice + " dystans:" + sum);
+                if (recordDist > sum)
+                {
+                    recordDist = sum;
+                    recordVert = vertice;
+                }
+
+                vertice = sharedGraph.GetNextVertice;
+            } 
+
+            sharedGraph.SetRecord(recordVert, recordDist);
+        }
+        
+        /*
         private void doChildWork(int vertice)  // operacje na wątku
         {
             int lowestDist = 99999;
+            int verticeNum = -1;
 
             do
             {
                 
                 int[] sum = DijkstraAlgorithm.Dijkstra(sharedGraph.Matrix, vertice, sharedGraph.MatrixSize);
                 int _sum = sum.Sum();
-                Console.WriteLine("Łączna długość najkrótszych ścieżek: " + "vert " + vertice+" dist "+_sum);
+                
 
-                lowestDist = (_sum < lowestDist) ? _sum : lowestDist;
+                if(lowestDist > _sum)
+                {
+                    lowestDist = _sum;
+                    verticeNum = vertice;
+                }
 
                 vertice = sharedGraph.GetNextVertice; // pobranie kolejnego wierzchołka do obliczeń
 
             } while (vertice >= 0);
 
-
-            sharedGraph.Dist = lowestDist;
-
-        }
+            sharedGraph.SetRecord(verticeNum, lowestDist);
+            
+            //sharedGraph.Dist = lowestDist;
+            //sharedGraph.VerticeNum = vertice;
+            
+        }*/
     }
 }

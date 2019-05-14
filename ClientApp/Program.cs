@@ -91,8 +91,11 @@ namespace ClientApp
                     Console.WriteLine("Algorytm uruchomiony");
                     ConcurrentProgram concurrent = new ConcurrentProgram(this.data.numberOfThreads, this.matrix,this.data.listOfVertices);
                     concurrent.Start();
-                    this.bestResult.distance = concurrent.BestResult;
+                    this.bestResult.distance = concurrent.RecordResult;
+                    this.bestResult.vertice = concurrent.RecordVertice;
+                    Console.WriteLine("najlepszy wierzcholek:{0}", concurrent.RecordVertice);
                     this.data.bestDistance = bestResult.distance;
+                    this.data.bestVertice = bestResult.vertice;
                     isBestResult = true;
 
                 }
@@ -205,6 +208,7 @@ namespace ClientApp
                 mre.WaitOne();
                 //mut.WaitOne();
                 //EventWaitHandle.SignalAndWait()
+            
                 if (callbackHandler.IsBestResult)
                 {
                     if (isDelayed) Thread.Sleep(10000);
@@ -216,7 +220,7 @@ namespace ClientApp
 
             } while (!callbackHandler.IsDone);
             // callbackHandler.TaskDone();
-
+           
             // SecuredSingleton.GetInstance().Release();
             //mut.ReleaseMutex();
             Console.WriteLine("Wciśnij <ENTER> aby zakończyć");

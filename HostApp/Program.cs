@@ -14,6 +14,7 @@ namespace HostApp
     {
         static void Main(string[] args)
         {
+            
             Uri baseAddress = new Uri("http://localhost:8001/DuplexService/");
 
             ServiceHost selfHost = new ServiceHost(typeof(Duplex),
@@ -25,6 +26,7 @@ namespace HostApp
             {
 
                 WSDualHttpBinding binding = new WSDualHttpBinding();
+               
                 binding.Security.Mode = WSDualHttpSecurityMode.None;
 
                 selfHost.AddServiceEndpoint(typeof(IDuplex),
