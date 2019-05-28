@@ -105,6 +105,7 @@ namespace ClientApp
                 mre.Set();
                 mre.Reset();
                 Console.WriteLine("Praca skończona");
+
             }
 
             public void JoinAccept()
@@ -206,13 +207,17 @@ namespace ClientApp
             {
 
                 mre.WaitOne();
+                mre.Reset();
+
                 //mut.WaitOne();
                 //EventWaitHandle.SignalAndWait()
-            
+
                 if (callbackHandler.IsBestResult)
                 {
                     if (isDelayed) Thread.Sleep(10000);
+                    Console.WriteLine("Przygotowywanie do wysłania.");
                     client.SendResult(callbackHandler.ClientData);
+                    Console.WriteLine("Dane wysłane do hosta.");
                 }
 
                 mre2.WaitOne();

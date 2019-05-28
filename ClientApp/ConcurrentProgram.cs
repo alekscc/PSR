@@ -39,7 +39,7 @@ namespace ClientApp
             //graph = new Graph(@"../../macierz.txt"); // instancja tej klasy będzie tylko na serwerze
             
 
-            this.numberOfThreads = (sharedGraph.GetVertices > this.numberOfThreads) ? this.numberOfThreads : sharedGraph.GetVertices;
+            this.numberOfThreads = (sharedGraph.GetVertices > this.numberOfThreads) ? this.numberOfThreads : (sharedGraph.GetVertices<1) ? 1 : sharedGraph.GetVertices;
 
  
                 Thread[] threads = new Thread[this.numberOfThreads];
@@ -52,11 +52,12 @@ namespace ClientApp
 
                 for (int i = 0; i < numberOfThreads; i++)
                 {
-
+                   
                     threads[i] = new Thread(() => { doChildWork(sharedGraph.GetNextVertice); });
 
                     threads[i].Start();
                 }
+            //Console.WriteLine("Sizeof matrix=" + sharedGraph.GetNumberOfVertices);
 
                 foreach (Thread t in threads)
                 {
@@ -82,9 +83,13 @@ namespace ClientApp
         }
         private void doChildWork(int vertice)
         {
+
+            if (vertice < 0) return;
+
+            //Console.WriteLine("WĄTEK WĄTEK");
             int recordVert = vertice;
             int recordDist = runDijkstraAlghoritm(vertice);
-
+           // Console.WriteLine("Łączna długość najkrótszych ścieżek: " + "wierzchołek:" + vertice + " dystans:" + recordDist);
             vertice = sharedGraph.GetNextVertice;
 
             while (vertice >= 0)

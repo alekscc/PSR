@@ -1,11 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Runtime.Serialization;
 using System.ServiceModel;
-using System.Text;
-using System.Threading;
+using System.Timers;
 
 namespace WcfServiceLibrary
 {
@@ -17,6 +13,40 @@ namespace WcfServiceLibrary
         EXECUTE,
         STATS
     }
+
+    class Client
+    {
+        private ClientData data;
+        private Timer timer = new Timer();
+        public Client(ClientData data)
+        {
+            this.data = data;
+        }
+        public ClientData Data
+        {
+            get
+            {
+                return data;
+            }
+            set
+            {
+                value = data;
+            }
+        }
+        public delegate void delHandler(object source, ElapsedEventArgs e);
+        public void SetTimer(delHandler handler,double interval)
+        {
+            timer.Elapsed += new ElapsedEventHandler(handler);
+            timer.Interval = interval;
+            timer.Enabled = true;
+        }
+        public void StopTimer()
+        {
+            timer.Enabled = false;
+        }
+        
+    }
+
     // NOTE: You can use the "Rename" command on the "Refactor" menu to change the class name "Service1" in both code and config file together.
     [ServiceBehavior(InstanceContextMode = InstanceContextMode.Single, ConcurrencyMode = ConcurrencyMode.Single)]
     public class Duplex : IDuplex
@@ -25,15 +55,20 @@ namespace WcfServiceLibrary
         //private IDuplexCallback callback;
         private int[][] matrix;
         private bool isMatrixReady = false;
-        private List<ClientData> listOfClients = new List<ClientData>();
+        private List<Client> listOfClients = new List<Client>();
         private System.Timers.Timer timer;
         private int numberOfClientsDone;
         private bool isWaiting = false;
+        private VerticesManagement verticesMgmt = new VerticesManagement();
+        //private ClientsManagement clientsMgmt = new ClientsManagement();
         
+        private int numberOfVertsPerClient = 1;
+        private System.Timers.Timer[] timers;
+        private float timeoutInterval = 1000;
 
         public Duplex()
         {
-            TestService();
+            //TestService();
             //Console.WriteLine("Duplex start");
             stage = STAGE_TYPE.JOIN;
             ServiceHostInterface serviceHostInterface = ServiceHostInterface.GetInstance();
@@ -54,7 +89,10 @@ namespace WcfServiceLibrary
                 data.Callback = callback;
                 data.bestDistance = -1;
                 data.bestVertice = -1;
-                listOfClients.Add(data);
+                listOfClients.Add(new Client(data));
+                //clientsMgmt.AddClient(data);
+
+
                 callback.Message("Dołączyłeś do hosta.");
                 //callback.JoinAccept();
                 return data;
@@ -68,19 +106,7 @@ namespace WcfServiceLibrary
             this.matrix = matrix;
             isMatrixReady = true;
         }
-        public void BroadcastMessage(string message)
-        {
-            foreach(ClientData c in listOfClients)
-            {
-                c.Callback.Message(message);
-            }
-        }
-
-        public void TestService()
-        {
-            Console.WriteLine("Service test.");
-            //callback.Message("testuje klienta");
-        }
+        
 
         public int[][] GetMatrixData()
         {
@@ -91,10 +117,17 @@ namespace WcfServiceLibrary
             int len = this.matrix.Length;
          
             Printer.PrintInfo("Synchronizacja macierzy: "+ len);
+            //clienMgmt.SyncMatrixData(matrix);
+
+            //clientsMgmt.SyncMatrixData(this.matrix);
+
+
+
+            
             for(int i=0;i<listOfClients.Count;i++)
             {
 
-                ClientData c = listOfClients[i];
+                 ClientData c = listOfClients[i].Data;
                  try
                  {
                     Console.Write("{0}: ", c.name);
@@ -112,26 +145,30 @@ namespace WcfServiceLibrary
                 {
                     Console.WriteLine("Timeout exception");
                     Console.WriteLine("Błąd połączenia z {0} ID={1}, usunięcie klienta.", c.Name, c.Identifier);
-                    listOfClients.Remove(c);
+                    listOfClients.Remove(listOfClients[i]);
                 }
 
 
             }
-
+            
         }
         public void Stats()
         {
             Console.WriteLine("NAME \t\t\t ID \t DATASYNC \t THREADS \t VERTICEID \t DISTANCE");
-            foreach(ClientData c in listOfClients)
+            foreach(Client cc in listOfClients)
             {
+                ClientData c = cc.Data;
                 Console.WriteLine("{0} \t {1} \t {2} \t\t {3} \t\t {4} \t\t {5}", c.Name,c.Identifier,c.IsDataReady,c.NumberOfThreads,c.VerticeId,c.VerticeDist);
             }
         }
-        public void BriefAllClients(int numberOfthreads)
+        public void BriefAllClients(int numberOfthreads,int numberOfVertsInPacket)
         {
+            this.numberOfVertsPerClient = numberOfVertsInPacket;
+
             if (stage == STAGE_TYPE.DATA_SYNC)
             {
-                Brief(numberOfthreads, matrix.Length,generateArrayOfVertices(matrix.Length));
+                _Brief(numberOfthreads, numberOfVertsPerClient);
+                //Brief(numberOfthreads, matrix.Length,generateArrayOfVertices(matrix.Length));
             }
             else Console.WriteLine("Dane nie są synchronizowane");
 
@@ -157,6 +194,43 @@ namespace WcfServiceLibrary
             }
             return sub;
         }
+        private void _Brief(int numberOfthreads,int vertsPerClient)
+        {
+            Printer.PrintInfo("Odprawa klientów");
+
+            int numberOfClients = listOfClients.Count;
+            int matrixSize = matrix.Length;
+
+            verticesMgmt.GenerateVertices(matrixSize);
+
+
+            if (numberOfClients > matrixSize)
+            {
+                Printer.PrintWarn("Za dużo kientów!");
+                return;
+            }
+            else if(numberOfClients < 1)
+            {
+                Printer.PrintWarn("Brak klientów");
+                return;
+            }
+            /*
+            foreach(var item in clientsMgmt.GetList())
+            {
+                clientsMgmt.SetTask(item.Data.Identifier,verticesMgmt.GetVertices(numberOfVertsPerClient),2000);
+            }
+            */
+
+            
+            for(int i=0;i<listOfClients.Count;i++)
+            {
+
+                listOfClients[i].Data.ListOfVertices = verticesMgmt.GetVertices(vertsPerClient);
+                listOfClients[i].Data.numberOfThreads = numberOfthreads;
+                //listOfClients[i].Callback.SendData(c);
+            }
+            
+        }
         private void Brief(int numberOfthreads,int matrixSize,int[] arrSource)
         {
             Console.WriteLine("Briefing");
@@ -168,7 +242,7 @@ namespace WcfServiceLibrary
             bool extraVertice = false;
             int vertices = (int)ratio;
             if (ratio % 1 != 0) extraVertice = true;
-            Console.WriteLine("Number of vertices per client:");
+            Console.WriteLine("Numer wierzchołka na klienta:");
             for (int i=0;i<numberOfClients;i++)
             {
                 verticesPerClient[i] = vertices;
@@ -182,12 +256,12 @@ namespace WcfServiceLibrary
 
             for (int i=0;i< numberOfClients; i++)
             {
-                ClientData c = listOfClients[i];
+                ClientData c = listOfClients[i].Data;
                 c.NumberOfThreads = numberOfthreads;
                 c.listOfVertices = getSubArrayOfVertices(arrSource,(i==0) ? 0: verticesPerClient[i - 1] * i,verticesPerClient[i]);//getListOfVertices((i == 0) ? 0 : verticesPerClient[i - 1]*i, verticesPerClient[i]);
 
                 int iip = 0;
-                Console.Write("THREAD {0}: ", c.id);
+                Console.Write("Wątek {0}: ", c.id);
                 foreach (int ii in c.listOfVertices)
                 { 
                     Console.Write("{0};", ii);
@@ -200,11 +274,11 @@ namespace WcfServiceLibrary
                 catch(TimeoutException toe)
                 {
                     Console.WriteLine("{0}: Utracono połączenie, usunięcie z listy.",c.Name);
-                    listOfClients.Remove(c);
+                    listOfClients.Remove(listOfClients[i]);
                     continue;
                 }
 
-                listOfClients[i].listOfVertices = c.listOfVertices;
+                listOfClients[i].Data.listOfVertices = c.listOfVertices;
             }
         }
         private int[] getListOfVertices(int beg,int n)
@@ -219,16 +293,20 @@ namespace WcfServiceLibrary
         }
         private void OnTimeEvent(object source, System.Timers.ElapsedEventArgs e)
         {
-            Console.WriteLine("Timeout - start");
+            
+            Console.WriteLine("Timeout - start ");
+             
+            
+            /*
             System.Timers.Timer tm = source as System.Timers.Timer;
             tm.Enabled = false;
             List<int> listOfLostVertices = new List<int>();
             for(int i=0;i<listOfClients.Count;i++)
             {
-                if(listOfClients[i].bestDistance<0)
+                if(listOfClients[i].Data.bestDistance<0)
                 {
                     //Console.WriteLine("found lost {0}",listOfClients[i].Identifier);
-                    listOfLostVertices.AddRange(listOfClients[i].listOfVertices);
+                    listOfLostVertices.AddRange(listOfClients[i].Data.listOfVertices);
                     listOfClients.Remove(listOfClients[i]);
                 }
             }
@@ -238,22 +316,44 @@ namespace WcfServiceLibrary
                 Console.Write("{0};", v);
             }
             Console.WriteLine();
-
-            Brief(1,matrix.Length,listOfLostVertices.ToArray());
+           // _Brief(1, 2);
+            //Brief(1,matrix.Length,listOfLostVertices.ToArray());
             Execute();
             Console.WriteLine("Timeout - end");
+            */
         }
         public void Execute()
         {
-            Console.WriteLine("Count of clients:{0}", listOfClients.Count);
-            // start algorytmu
+            Console.WriteLine("Liczba klientów:{0}", listOfClients.Count);
+            /*
+            try
+            {
+                foreach (var item in clientsMgmt.GetList())
+                {
+                    clientsMgmt.SetTask(item.Data.Identifier, verticesMgmt.GetVertices(numberOfVertsPerClient), timeoutInterval);
+                }
+            }
+            catch (TimeoutException toe)
+            {
+                Console.WriteLine("Utracono połączenie, usunięcie z listy.");
+            }
+            catch (CommunicationException cex)
+            {
+                Printer.PrintWarn("Błąd komunikacji");
+            }
+            */
+ 
+            // start 
+            
             for(int i=0;i<listOfClients.Count;i++)
             {
-                ClientData c = listOfClients[i];
+                 
+                ClientData c = listOfClients[i].Data;
 
                 try
                 {
                     c.Callback.SendData(c);
+                    //listOfClients[i].SetTimer(OnTimeEvent, timeoutInterval);
                     Console.WriteLine("Wysłano do {0}", c.Identifier);
                 }
                 catch (TimeoutException toe)
@@ -266,12 +366,12 @@ namespace WcfServiceLibrary
                 }
                 
             }
-
-            timer = new System.Timers.Timer();
-            timer.Elapsed += new System.Timers.ElapsedEventHandler(OnTimeEvent);
-            timer.Interval = 3000;
-            timer.Enabled = true;
-            numberOfClientsDone = 0;
+            /*
+             timer = new System.Timers.Timer();
+             timer.Elapsed += new System.Timers.ElapsedEventHandler(OnTimeEvent);
+             timer.Interval = 3000;
+             timer.Enabled = true;
+             numberOfClientsDone = 0;*/
         }
     
         public void JoinClients()
@@ -323,31 +423,68 @@ namespace WcfServiceLibrary
             }
             Console.ForegroundColor = ConsoleColor.Gray;
         }
-
         public void SendResult(ClientData clientData)
         {
-            for(int i=0;i<listOfClients.Count;i++)
+            /*
+            clientsMgmt.GetResult(clientData.Identifier);
+            verticesMgmt.SubmitVertices(clientData.ListOfVertices);
+            Console.WriteLine("Klient: {0}; Wierzchołek: {1}; Dystans: {2};", clientData.Identifier, clientData.bestVertice, clientData.bestDistance);
+            if(!verticesMgmt.IsListEmpty())
             {
-                if(listOfClients[i].Identifier == clientData.Identifier)
+                clientsMgmt.SetTask(clientData.Identifier, verticesMgmt.GetVertices(numberOfVertsPerClient), timeoutInterval);
+            }
+            */
+           
+           
+            for (int i = 0; i < listOfClients.Count; i++)
+            {
+                if(listOfClients[i].Data.Identifier ==clientData.Identifier)
                 {
-                    Console.WriteLine("Otrzymałem wynik od {0} najkrótszy dystans to:{1}", clientData.id, clientData.bestDistance);
-                    listOfClients[i].bestDistance = clientData.bestDistance;
-                    listOfClients[i].bestVertice = clientData.bestVertice;
-                    if (++numberOfClientsDone == listOfClients.Count)
-                    {
-                        timer.Enabled = false;
-                        foreach(ClientData c in listOfClients)
-                        {
-                            c.Callback.JoinAccept();
-                        }
-                        // koniec algorytmu
-                    }
-                    Console.WriteLine(numberOfClientsDone + "/" + listOfClients.Count);
+                    if (clientData.bestDistance == 0) continue;
 
-                    return;
+                    Console.WriteLine("Otrzymałem wynik od {0} najkrótszy dystans to:{1} dla wierzchołka {2}", clientData.id, clientData.bestDistance,clientData.bestVertice);
+                    verticesMgmt.SubmitVertices(listOfClients[i].Data.listOfVertices);
+                    if (!verticesMgmt.IsListEmpty())
+                    {
+                        listOfClients[i].Data.listOfVertices = verticesMgmt.GetVertices(numberOfVertsPerClient);
+
+                        listOfClients[i].Data.Callback.SendData(listOfClients[i].Data);
+                    }
+                    else
+                    {
+                        listOfClients[i].Data.Callback.JoinAccept();
+                        Console.WriteLine("Lista jest pusta");
+                    }
                 }
             }
-            Console.WriteLine("Nie rozpoznano nadawcy wiadomosci.");
+            
         }
-    }
+                /*
+                public void SendResult(ClientData clientData)
+                {
+                    for(int i=0;i<listOfClients.Count;i++)
+                    {
+                        if(listOfClients[i].Identifier == clientData.Identifier)
+                        {
+                            Console.WriteLine("Otrzymałem wynik od {0} najkrótszy dystans to:{1}", clientData.id, clientData.bestDistance);
+                            listOfClients[i].bestDistance = clientData.bestDistance;
+                            listOfClients[i].bestVertice = clientData.bestVertice;
+                            if (++numberOfClientsDone == listOfClients.Count)
+                            {
+                                timer.Enabled = false;
+                                foreach(ClientData c in listOfClients)
+                                {
+                                    c.Callback.JoinAccept();
+                                }
+                                // koniec algorytmu
+                            }
+                            Console.WriteLine(numberOfClientsDone + "/" + listOfClients.Count);
+
+                            return;
+                        }
+                    }
+                    Console.WriteLine("Nie rozpoznano nadawcy wiadomosci.");
+
+                } */
+            }
 }

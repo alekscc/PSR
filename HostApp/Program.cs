@@ -54,7 +54,7 @@ namespace HostApp
 
                     if(cmd.CompareTo("test")==0)
                     {
-                        instance.TestService();
+                        //instance.TestService();
                     }
                     else if(cmd.CompareTo("join")==0)
                     {
@@ -70,11 +70,13 @@ namespace HostApp
                     }
                     else if(cmd.CompareTo("brief")==0)
                     {
-                        Console.WriteLine("Number of threads?");
+                        Console.Write("Ilość wątków:");
                         string line = Console.ReadLine();
                         int num = int.Parse(line);
+                        Console.Write("Ilość wierzchołków w pakiecie:");
+                        string numberOfVertsInPacket = Console.ReadLine();
 
-                        instance.BriefAllClients(num);
+                        instance.BriefAllClients(num,int.Parse(numberOfVertsInPacket));
                     }
                     else if(cmd.CompareTo("start")==0)
                     {
@@ -83,7 +85,7 @@ namespace HostApp
                     }
                     else if(cmd.CompareTo("testbroadcast")==0)
                     {
-                        instance.BroadcastMessage("testowa wiadomosc do wszystkich klientow");
+                        //instance.BroadcastMessage("testowa wiadomosc do wszystkich klientow");
                     }
                     else if(cmd.CompareTo("stats")==0)
                     {

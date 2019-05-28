@@ -31,13 +31,21 @@ namespace ClientApp
                 return matrix;
             }
         }
+        public int GetNumberOfVertices
+        {
+            get
+            {
+                return vertices.Length;
+            }
+        }
         public int GetNextVertice
         {
             get
             {
                 lock(block)
                 {
-                    return (curVertice >= 0) ? vertices[curVertice--] : -1;
+                   // Console.WriteLine("current vert:" + curVertice);
+                    return (curVertice >=0) ? vertices[curVertice--] : -1;
                 }
             }
         }
@@ -85,7 +93,7 @@ namespace ClientApp
             this.size = this.matrix.GetLength(0);
             
             this.vertices = vertices;
-            this.curVertice = vertices.Length - 1;
+            this.curVertice = vertices.Length-1;
 
             if(this.vertices==null)
             {

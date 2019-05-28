@@ -13,8 +13,6 @@ namespace WcfServiceLibrary
     {
         [OperationContract]
         ClientData Join(string name);
-        [OperationContract(IsOneWay =true)]
-        void TestService();
         [OperationContract(IsOneWay = true)]
         void SendResult(ClientData clientData);
         [OperationContract(IsOneWay = false)]

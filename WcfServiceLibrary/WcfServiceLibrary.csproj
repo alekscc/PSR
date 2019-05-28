@@ -56,12 +56,14 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="ClientData.cs" />
+    <Compile Include="ClientsManagement.cs" />
     <Compile Include="IDuplex.cs" />
     <Compile Include="Printer.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Duplex.cs" />
     <Compile Include="Properties\ServiceHostInterface.cs" />
     <Compile Include="ServiceHostInterface.cs" />
+    <Compile Include="VerticesManagement.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config">
