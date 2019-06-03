@@ -63,7 +63,7 @@ namespace HostApp
                     }
                     else if(cmd.CompareTo("datasync")==0)
                     {
-                        Graph graph = new Graph(@"../../macierz.txt");
+                        Graph graph = new Graph(@"macierz.txt");
                         instance.SetMatrix(graph.matrix);
                         //instance.SetStage(STAGE_TYPE.DATA_SYNC);
                         instance.SyncClientsData();
@@ -91,7 +91,12 @@ namespace HostApp
                     {
                         instance.Stats();
                     }
-                   
+                    else if (cmd.CompareTo("generatematrix") == 0)
+                    {
+                        Graph graph = new Graph();
+                        graph.generateMatrix();
+                    }
+
 
                 } while (cmd.CompareTo("exit") != 0);
 
