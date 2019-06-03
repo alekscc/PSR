@@ -105,16 +105,25 @@ namespace WcfServiceLibrary
             return true;
         }
         public bool IsListEmpty()
-        { 
+        {
+            int count = 0;
 
-            if (listOfVertices.Count == 0) return true;
-            return false;
+            foreach (var vert in listOfVertices)
+                if (vert.Status == VERTICE_STATUS.FREE)
+                    count++;
+
+            if (count > 0) return false;
+            return true;
+        }
+        public int GetNumberOfVertices()
+        {
+            return listOfVertices.Count;
         }
         
         public int[] GetVertices(int n)
         {
+       
             int[] arr = new int[n];
-            Console.WriteLine("n={0}", n);
             int j=0;
             for(int i=0;i<listOfVertices.Count && j < n;i++)
             {

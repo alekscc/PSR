@@ -10,6 +10,7 @@ namespace WcfServiceLibrary
         static ConsoleColor infoCol = ConsoleColor.White;
         static ConsoleColor warnCol = ConsoleColor.DarkYellow;
         static ConsoleColor errCol = ConsoleColor.DarkRed;
+        static ConsoleColor recCol = ConsoleColor.Green;
 
         static public void PrintInfo(string msg)
         {
@@ -27,6 +28,12 @@ namespace WcfServiceLibrary
         {
             Console.ForegroundColor = errCol;
             Console.WriteLine(msg);
+            Console.ResetColor();
+        }
+        static public void PrintRecord(int vert,int dist)
+        {
+            Console.ForegroundColor = recCol;
+            Console.WriteLine("Nowy rekord! Wierzchołek:{0}, Dystans:{1}",vert,dist);
             Console.ResetColor();
         }
     }

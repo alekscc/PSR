@@ -14,10 +14,14 @@ namespace WcfServiceLibrary
         STATS
     }
 
+
+
     class Client
     {
         private ClientData data;
         private Timer timer = new Timer();
+        private bool isFree = false;
+
         public Client(ClientData data)
         {
             this.data = data;
@@ -33,16 +37,28 @@ namespace WcfServiceLibrary
                 value = data;
             }
         }
+
+        public bool IsFree { get => isFree; set => isFree = value; }
+
         public delegate void delHandler(object source, ElapsedEventArgs e);
         public void SetTimer(delHandler handler,double interval)
         {
             timer.Elapsed += new ElapsedEventHandler(handler);
             timer.Interval = interval;
             timer.Enabled = true;
+           
         }
         public void StopTimer()
         {
             timer.Enabled = false;
+        }
+        public Timer GetTimer()
+        {
+            return timer;
+        }
+        public void SetRecord()
+        {
+
         }
         
     }
@@ -60,11 +76,13 @@ namespace WcfServiceLibrary
         private int numberOfClientsDone;
         private bool isWaiting = false;
         private VerticesManagement verticesMgmt = new VerticesManagement();
+        public int recordVert = -1;
+        public int recordDist = -1;
         //private ClientsManagement clientsMgmt = new ClientsManagement();
         
         private int numberOfVertsPerClient = 1;
         private System.Timers.Timer[] timers;
-        private float timeoutInterval = 1000;
+        private float timeoutInterval = 15000;
 
         public Duplex()
         {
@@ -295,8 +313,50 @@ namespace WcfServiceLibrary
         {
             
             Console.WriteLine("Timeout - start ");
-             
-            
+
+            var timer = source as Timer;
+         
+            foreach(var c in listOfClients)
+            {
+                if (c.GetTimer().Equals(timer))
+                {
+                    Console.WriteLine("Timer:Usunołem klienta {0}\n",c.Data.Identifier);
+                    verticesMgmt.FreeVertices(c.Data.ListOfVertices);
+                    c.StopTimer();
+                    listOfClients.Remove(c);
+
+
+                    for(int i = 0; i < listOfClients.Count; i++)
+                    {
+                        if (listOfClients[i].IsFree)
+                        {
+                            listOfClients[i].IsFree = false;
+                            listOfClients[i].Data.listOfVertices = verticesMgmt.GetVertices(numberOfVertsPerClient);
+                            listOfClients[i].Data.Callback.SendData(listOfClients[i].Data);
+                            listOfClients[i].SetTimer(OnTimeEvent, timeoutInterval);
+                        }
+                    }
+
+
+                    return;
+                }
+            }
+            Console.WriteLine("nie odnalazlem tego alarmu");
+
+            timer.Enabled = false;
+
+            int ii = 0;
+            foreach (var c in listOfClients)
+                if (c.IsFree)
+                    ii++;
+                else return;
+
+            if(ii==listOfClients.Count)
+            {
+                foreach (var c in listOfClients)
+                    c.Data.Callback.JoinAccept();
+            }
+
             /*
             System.Timers.Timer tm = source as System.Timers.Timer;
             tm.Enabled = false;
@@ -355,6 +415,7 @@ namespace WcfServiceLibrary
                     c.Callback.SendData(c);
                     //listOfClients[i].SetTimer(OnTimeEvent, timeoutInterval);
                     Console.WriteLine("Wysłano do {0}", c.Identifier);
+                    listOfClients[i].SetTimer(OnTimeEvent, timeoutInterval);
                 }
                 catch (TimeoutException toe)
                 {
@@ -434,30 +495,57 @@ namespace WcfServiceLibrary
                 clientsMgmt.SetTask(clientData.Identifier, verticesMgmt.GetVertices(numberOfVertsPerClient), timeoutInterval);
             }
             */
-           
-           
+
+
             for (int i = 0; i < listOfClients.Count; i++)
             {
-                if(listOfClients[i].Data.Identifier ==clientData.Identifier)
+               
+                if(listOfClients[i].Data.Identifier ==clientData.id)
                 {
                     if (clientData.bestDistance == 0) continue;
 
                     Console.WriteLine("Otrzymałem wynik od {0} najkrótszy dystans to:{1} dla wierzchołka {2}", clientData.id, clientData.bestDistance,clientData.bestVertice);
                     verticesMgmt.SubmitVertices(listOfClients[i].Data.listOfVertices);
+
+                    if(recordVert==-1)
+                    {
+                        recordVert = clientData.bestVertice;
+                        recordDist = clientData.bestDistance;
+                        Printer.PrintRecord(recordVert, recordDist);
+                    }
+                    else if (recordDist > clientData.bestDistance)
+                    {
+                        recordVert = clientData.bestVertice;
+                        recordDist = clientData.bestDistance;
+                        Printer.PrintRecord(recordVert, recordDist);
+                    }
+                   
+
                     if (!verticesMgmt.IsListEmpty())
                     {
+
+                        listOfClients[i].SetTimer(OnTimeEvent, timeoutInterval);
                         listOfClients[i].Data.listOfVertices = verticesMgmt.GetVertices(numberOfVertsPerClient);
 
                         listOfClients[i].Data.Callback.SendData(listOfClients[i].Data);
+                        listOfClients[i].IsFree = false;
+
                     }
                     else
                     {
-                        listOfClients[i].Data.Callback.JoinAccept();
+                        listOfClients[i].StopTimer();
+                        listOfClients[i].IsFree = true;
+                        //listOfClients[i].Data.Callback.JoinAccept();
+                        
                         Console.WriteLine("Lista jest pusta");
                     }
                 }
             }
             
+        }
+        public void FreeAll()
+        {
+
         }
                 /*
                 public void SendResult(ClientData clientData)

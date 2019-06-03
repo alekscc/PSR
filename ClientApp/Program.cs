@@ -81,14 +81,14 @@ namespace ClientApp
                 isDone = false;
                 if(this.matrix==null)
                 {
-                    Console.WriteLine("matrix is empty, quitting");
+                    Console.WriteLine("Brak danych macierzy");
                     return;
                 }
                 
                 if (data != null)
                 {
     
-                    Console.WriteLine("Algorytm uruchomiony");
+                  
                     ConcurrentProgram concurrent = new ConcurrentProgram(this.data.numberOfThreads, this.matrix,this.data.listOfVertices);
                     concurrent.Start();
                     this.bestResult.distance = concurrent.RecordResult;
@@ -121,6 +121,7 @@ namespace ClientApp
 
                 mre2.Set();
                 mre2.Reset();
+                Console.WriteLine("Połączenie zakończone");
 
             }
 
@@ -207,8 +208,8 @@ namespace ClientApp
             {
 
                 mre.WaitOne();
-                mre.Reset();
-
+                //mre.Reset();
+                //Thread.Sleep(1000);
                 //mut.WaitOne();
                 //EventWaitHandle.SignalAndWait()
 

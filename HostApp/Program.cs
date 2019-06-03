@@ -52,11 +52,8 @@ namespace HostApp
                 {
                     cmd = Console.ReadLine();
 
-                    if(cmd.CompareTo("test")==0)
-                    {
-                        //instance.TestService();
-                    }
-                    else if(cmd.CompareTo("join")==0)
+
+                    if(cmd.CompareTo("join")==0)
                     {
                         //instance.SetStage(STAGE_TYPE.JOIN);
                         instance.JoinClients();
@@ -83,10 +80,7 @@ namespace HostApp
                         Console.WriteLine("Uruchamiam algorytm u klientów");
                         instance.Execute();
                     }
-                    else if(cmd.CompareTo("testbroadcast")==0)
-                    {
-                        //instance.BroadcastMessage("testowa wiadomosc do wszystkich klientow");
-                    }
+
                     else if(cmd.CompareTo("stats")==0)
                     {
                         instance.Stats();
