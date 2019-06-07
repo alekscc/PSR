@@ -27,9 +27,6 @@
   <wsdl:message name="IDuplex_Join_OutputMessage">
     <wsdl:part name="parameters" element="tns:JoinResponse" />
   </wsdl:message>
-  <wsdl:message name="IDuplex_TestService_InputMessage">
-    <wsdl:part name="parameters" element="tns:TestService" />
-  </wsdl:message>
   <wsdl:message name="IDuplex_SendResult_InputMessage">
     <wsdl:part name="parameters" element="tns:SendResult" />
   </wsdl:message>
@@ -69,13 +66,13 @@
   <wsdl:message name="IDuplex_JoinAccept_OutputCallbackMessage">
     <wsdl:part name="parameters" element="tns:JoinAccept" />
   </wsdl:message>
+  <wsdl:message name="IDuplex_Reset_OutputCallbackMessage">
+    <wsdl:part name="parameters" element="tns:Reset" />
+  </wsdl:message>
   <wsdl:portType msc:usingSession="true" name="IDuplex">
     <wsdl:operation msc:isInitiating="true" msc:isTerminating="false" name="Join">
       <wsdl:input wsaw:Action="http://tempuri.org/IDuplex/Join" message="tns:IDuplex_Join_InputMessage" />
       <wsdl:output wsaw:Action="http://tempuri.org/IDuplex/JoinResponse" message="tns:IDuplex_Join_OutputMessage" />
-    </wsdl:operation>
-    <wsdl:operation msc:isInitiating="true" msc:isTerminating="false" name="TestService">
-      <wsdl:input wsaw:Action="http://tempuri.org/IDuplex/TestService" message="tns:IDuplex_TestService_InputMessage" />
     </wsdl:operation>
     <wsdl:operation msc:isInitiating="true" msc:isTerminating="false" name="SendResult">
       <wsdl:input wsaw:Action="http://tempuri.org/IDuplex/SendResult" message="tns:IDuplex_SendResult_InputMessage" />
@@ -108,6 +105,9 @@
     <wsdl:operation msc:isInitiating="true" msc:isTerminating="false" name="JoinAccept">
       <wsdl:output wsaw:Action="http://tempuri.org/IDuplex/JoinAccept" message="tns:IDuplex_JoinAccept_OutputCallbackMessage" />
     </wsdl:operation>
+    <wsdl:operation msc:isInitiating="true" msc:isTerminating="false" name="Reset">
+      <wsdl:output wsaw:Action="http://tempuri.org/IDuplex/Reset" message="tns:IDuplex_Reset_OutputCallbackMessage" />
+    </wsdl:operation>
   </wsdl:portType>
   <wsdl:binding name="WSDualHttpBinding_IDuplex" type="tns:IDuplex">
     <wsp:PolicyReference URI="#WSDualHttpBinding_IDuplex_policy" />
@@ -120,12 +120,6 @@
       <wsdl:output>
         <soap12:body use="literal" />
       </wsdl:output>
-    </wsdl:operation>
-    <wsdl:operation name="TestService">
-      <soap12:operation soapAction="http://tempuri.org/IDuplex/TestService" style="document" />
-      <wsdl:input>
-        <soap12:body use="literal" />
-      </wsdl:input>
     </wsdl:operation>
     <wsdl:operation name="SendResult">
       <soap12:operation soapAction="http://tempuri.org/IDuplex/SendResult" style="document" />
@@ -189,6 +183,12 @@
     </wsdl:operation>
     <wsdl:operation name="JoinAccept">
       <soap12:operation soapAction="http://tempuri.org/IDuplex/JoinAccept" style="document" />
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="Reset">
+      <soap12:operation soapAction="http://tempuri.org/IDuplex/Reset" style="document" />
       <wsdl:output>
         <soap12:body use="literal" />
       </wsdl:output>

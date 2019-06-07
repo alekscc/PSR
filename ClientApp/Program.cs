@@ -29,7 +29,7 @@ namespace ClientApp
             private bool isBestResult = false;
             private bool mutStatus = false;
             private bool isDone = false;
-            
+            private int vertsCounter = 0;
   
 
             public CallbackHandler()
@@ -90,12 +90,15 @@ namespace ClientApp
     
                   
                     ConcurrentProgram concurrent = new ConcurrentProgram(this.data.numberOfThreads, this.matrix,this.data.listOfVertices);
-                    concurrent.Start();
+                    long time = 0;
+                    vertsCounter += concurrent.Start(out time);
+                    Console.WriteLine("Ilość obliczonych wierzchołków dla kliena:{0}", vertsCounter);
                     this.bestResult.distance = concurrent.RecordResult;
                     this.bestResult.vertice = concurrent.RecordVertice;
                     Console.WriteLine("najlepszy wierzcholek:{0}", concurrent.RecordVertice);
                     this.data.bestDistance = bestResult.distance;
                     this.data.bestVertice = bestResult.vertice;
+                    this.data.time = time;
                     isBestResult = true;
 
                 }
@@ -123,6 +126,11 @@ namespace ClientApp
                 mre2.Reset();
                 Console.WriteLine("Połączenie zakończone");
 
+            }
+
+            public void Reset()
+            {
+                vertsCounter = 0;
             }
 
             public bool IsCalled

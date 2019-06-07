@@ -34,7 +34,7 @@ namespace ClientApp
             this.numberOfThreads = numberOfThreads;
             sharedGraph = new SharedGraphData(matrix,vertices);// klasa do przechowywania danych współdzielonych
         }
-        public void Start() // wczytywanie danych tymczasowo w tej metodzie
+        public int Start(out long time) // wczytywanie danych tymczasowo w tej metodzie
         {
             //graph = new Graph(@"../../macierz.txt"); // instancja tej klasy będzie tylko na serwerze
             
@@ -44,7 +44,7 @@ namespace ClientApp
  
                 Thread[] threads = new Thread[this.numberOfThreads];
                 // czas wyknania algorytmu dla klienta
-                var watch = System.Diagnostics.Stopwatch.StartNew();
+             //   var watch = System.Diagnostics.Stopwatch.StartNew();
 
                 DateTime start = DateTime.Now;
             DateTime stop;
@@ -64,14 +64,16 @@ namespace ClientApp
                     t.Join();
 
                 }
-                watch.Stop();
+               // watch.Stop();
             stop = DateTime.Now;
             interval = stop - start;
-            long czas = interval.Ticks * 100;
-                var elapsedMiliseconds = watch.ElapsedMilliseconds;
-                Console.WriteLine("Czas całkowity:" + elapsedMiliseconds + "ms "+czas);
-            // czas wyknania algorytmu dla klienta - koniec
+            time = interval.Ticks * 100;
+            // var elapsedMiliseconds = watch.ElapsedMilliseconds;
+            //  Console.WriteLine("Czas całkowity:" + elapsedMiliseconds + "ms "+czas);
 
+            Console.WriteLine("Czas całkowity: "+time+" nanosec");
+            // czas wyknania algorytmu dla klienta - koniec
+            return sharedGraph.GetNumberOfVertices-sharedGraph.GetVertices-1;
         }
         private int runDijkstraAlghoritm(int vertice)
         {
@@ -89,13 +91,14 @@ namespace ClientApp
             //Console.WriteLine("WĄTEK WĄTEK");
             int recordVert = vertice;
             int recordDist = runDijkstraAlghoritm(vertice);
-            Console.WriteLine("Łączna długość najkrótszych ścieżek: " + "wierzchołek:" + vertice + " dystans:" + recordDist);
+            //Console.WriteLine("Łączna długość najkrótszych ścieżek: " + "wierzchołek:" + vertice + " dystans:" + recordDist);
             vertice = sharedGraph.GetNextVertice;
 
             while (vertice >= 0)
             {
                 int sum = runDijkstraAlghoritm(vertice);
-                Console.WriteLine("Łączna długość najkrótszych ścieżek: " + "wierzchołek:" + vertice + " dystans:" + sum);
+               // Console.WriteLine("Łączna długość najkrótszych ścieżek: " + "wierzchołek:" + vertice + " dystans:" + sum);
+               // Console.WriteLine("Łączna długość najkrótszych ścieżek: " + "wierzchołek:" + vertice + " dystans:" + sum);
                 if (recordDist > sum)
                 {
                     recordDist = sum;

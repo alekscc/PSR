@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.ServiceModel;
+using System.Text;
 using System.Timers;
 
 namespace WcfServiceLibrary
@@ -21,7 +23,12 @@ namespace WcfServiceLibrary
         private ClientData data;
         private Timer timer = new Timer();
         private bool isFree = false;
+        private int locRecordVert = -1;
+        private int locRecordDist = 1;
+        private long totalTime=0;
 
+
+        
         public Client(ClientData data)
         {
             this.data = data;
@@ -56,11 +63,38 @@ namespace WcfServiceLibrary
         {
             return timer;
         }
-        public void SetRecord()
+        public void SetRecord(int vert, int dist)
         {
+            if(locRecordDist> dist || locRecordVert == -1)
+            {
+                locRecordDist = dist;
+                locRecordVert = vert;
+            }
+           
 
         }
-        
+        public void ClearRecord()
+        {
+            locRecordVert = -1;
+            locRecordDist = -1;
+            totalTime = 0;
+        }
+        public int RecordVertice
+        {
+            get
+            {
+                return locRecordVert;
+            }
+        }
+        public int RecordDistance
+        {
+            get
+            {
+                return locRecordDist;
+            }
+        }
+
+        public long TotalTime { get => totalTime; set => totalTime = value; }
     }
 
     // NOTE: You can use the "Rename" command on the "Refactor" menu to change the class name "Service1" in both code and config file together.
@@ -78,11 +112,19 @@ namespace WcfServiceLibrary
         private VerticesManagement verticesMgmt = new VerticesManagement();
         public int recordVert = -1;
         public int recordDist = -1;
+        // czas calkowity
+        DateTime startTotalTime;
+        DateTime stopTotalTime;
+        TimeSpan intervalTotalTime;
+        long totalTime;
+        int clientsDone = 0;
+
         //private ClientsManagement clientsMgmt = new ClientsManagement();
-        
+
         private int numberOfVertsPerClient = 1;
+        private int numberOfThreads = 1;
         private System.Timers.Timer[] timers;
-        private float timeoutInterval = 15000;
+        private float timeoutInterval = 60000;
 
         public Duplex()
         {
@@ -138,9 +180,6 @@ namespace WcfServiceLibrary
             //clienMgmt.SyncMatrixData(matrix);
 
             //clientsMgmt.SyncMatrixData(this.matrix);
-
-
-
             
             for(int i=0;i<listOfClients.Count;i++)
             {
@@ -149,10 +188,18 @@ namespace WcfServiceLibrary
                  try
                  {
                     Console.Write("{0}: ", c.name);
-                    // start czasu przessylania danych
+
+                    DateTime start = DateTime.Now;
+                    DateTime stop;
+                    TimeSpan interval;
+
                     if (len == c.Callback.DataSync(this.matrix))
                     {
-                        // stop czasu przessylania danych
+                        stop = DateTime.Now;
+                        interval = stop - start;
+                        long czas = interval.Ticks * 100;
+
+                        Console.Write(" " + czas + " nanosec ");
                         Console.WriteLine("OK");
                         c.IsDataReady = true;
 
@@ -176,12 +223,14 @@ namespace WcfServiceLibrary
             foreach(Client cc in listOfClients)
             {
                 ClientData c = cc.Data;
-                Console.WriteLine("{0} \t {1} \t {2} \t\t {3} \t\t {4} \t\t {5}", c.Name,c.Identifier,c.IsDataReady,c.NumberOfThreads,c.VerticeId,c.VerticeDist);
+                Console.WriteLine("{0} \t {1} \t {2} \t\t {3} \t\t {4} \t\t {5}", c.Name,c.Identifier,c.IsDataReady,c.NumberOfThreads,cc.RecordVertice,cc.RecordDistance);
             }
+            Console.WriteLine("Najlepszy wynik to, wierzchołek:{0} dystans:{1}", recordVert, recordDist);
         }
         public void BriefAllClients(int numberOfthreads,int numberOfVertsInPacket)
         {
             this.numberOfVertsPerClient = numberOfVertsInPacket;
+            this.numberOfThreads = numberOfThreads;
 
             if (stage == STAGE_TYPE.DATA_SYNC)
             {
@@ -216,6 +265,10 @@ namespace WcfServiceLibrary
         {
             Printer.PrintInfo("Odprawa klientów");
 
+            recordDist = -1;
+            recordVert = -1;
+
+
             int numberOfClients = listOfClients.Count;
             int matrixSize = matrix.Length;
 
@@ -242,7 +295,8 @@ namespace WcfServiceLibrary
             
             for(int i=0;i<listOfClients.Count;i++)
             {
-
+                listOfClients[i].Data.Callback.Reset();
+                listOfClients[i].ClearRecord();
                 listOfClients[i].Data.ListOfVertices = verticesMgmt.GetVertices(vertsPerClient);
                 listOfClients[i].Data.numberOfThreads = numberOfthreads;
                 //listOfClients[i].Callback.SendData(c);
@@ -402,10 +456,13 @@ namespace WcfServiceLibrary
                 Printer.PrintWarn("Błąd komunikacji");
             }
             */
- 
-            // start 
+
+            // start
+
+            startTotalTime = DateTime.Now;
             
-            for(int i=0;i<listOfClients.Count;i++)
+
+            for (int i=0;i<listOfClients.Count;i++)
             {
                  
                 ClientData c = listOfClients[i].Data;
@@ -507,6 +564,10 @@ namespace WcfServiceLibrary
                     Console.WriteLine("Otrzymałem wynik od {0} najkrótszy dystans to:{1} dla wierzchołka {2}", clientData.id, clientData.bestDistance,clientData.bestVertice);
                     verticesMgmt.SubmitVertices(listOfClients[i].Data.listOfVertices);
 
+                    listOfClients[i].TotalTime += clientData.time;
+
+                    listOfClients[i].SetRecord(clientData.bestVertice, clientData.bestDistance);
+
                     if(recordVert==-1)
                     {
                         recordVert = clientData.bestVertice;
@@ -538,6 +599,41 @@ namespace WcfServiceLibrary
                         //listOfClients[i].Data.Callback.JoinAccept();
                         
                         Console.WriteLine("Lista jest pusta");
+                        if(++clientsDone == listOfClients.Count)
+                        {
+                            Console.WriteLine("Progam zakonczony");
+                            stopTotalTime = DateTime.Now;
+                            intervalTotalTime = stopTotalTime - startTotalTime;
+                            totalTime = intervalTotalTime.Ticks * 100;
+                            Console.WriteLine("Czas całkowiy:"+ totalTime);
+                            long clientsTotalTime = 0;
+                            foreach(Client c in listOfClients)
+                            {
+                                clientsTotalTime += c.TotalTime;
+                            }
+                            Console.WriteLine("Czas algorytmu:" + clientsTotalTime);
+                            long commTotalTime = (totalTime - clientsTotalTime);
+                            Console.WriteLine("czas komunikacji:" + commTotalTime);
+
+                            FileStream fileStream = new FileStream("wyniki.csv", FileMode.Create, FileAccess.ReadWrite);
+                            StreamWriter w = new StreamWriter(fileStream,Encoding.UTF8);
+                            w.WriteLine("Ilosc wierzchołków;ilość watkow;ilosc klientow;wielkosc pakietu;czas calk.;czas kom.;czas alg.");
+                            w.WriteLine(matrix.Length + ";" + numberOfThreads + ";" + clientsDone + ";" + numberOfVertsPerClient + ";" + totalTime + ";" + commTotalTime + ";" + clientsTotalTime);
+                            /*            for (int i = 0; i < rozmiar; i++)
+                                        {
+                                            for (int j = 0; j < rozmiar; j++)
+                                            {
+                                                if (j < rozmiar - 1)
+                                                    w.Write(matrix[i, j] + " ");
+                                                else
+                                                    w.WriteLine(matrix[i, j]);
+                                            }
+                                        }
+                                        */
+                            w.Close();
+                            fileStream.Close();
+
+                        }
                     }
                 }
             }

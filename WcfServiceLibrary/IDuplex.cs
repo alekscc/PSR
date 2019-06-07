@@ -36,6 +36,8 @@ namespace WcfServiceLibrary
         void StartWork();
         [OperationContract(IsOneWay = true)]
         void JoinAccept();
+        [OperationContract(IsOneWay = true)]
+        void Reset();
 
     }
 

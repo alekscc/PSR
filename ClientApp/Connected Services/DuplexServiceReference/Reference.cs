@@ -40,6 +40,9 @@ namespace ClientApp.DuplexServiceReference {
         [System.Runtime.Serialization.OptionalFieldAttribute()]
         private int numberOfThreadsField;
         
+        [System.Runtime.Serialization.OptionalFieldAttribute()]
+        private long timeField;
+        
         [global::System.ComponentModel.BrowsableAttribute(false)]
         public System.Runtime.Serialization.ExtensionDataObject ExtensionData {
             get {
@@ -128,6 +131,19 @@ namespace ClientApp.DuplexServiceReference {
             }
         }
         
+        [System.Runtime.Serialization.DataMemberAttribute()]
+        public long time {
+            get {
+                return this.timeField;
+            }
+            set {
+                if ((this.timeField.Equals(value) != true)) {
+                    this.timeField = value;
+                    this.RaisePropertyChanged("time");
+                }
+            }
+        }
+        
         public event System.ComponentModel.PropertyChangedEventHandler PropertyChanged;
         
         protected void RaisePropertyChanged(string propertyName) {
@@ -165,9 +181,6 @@ namespace ClientApp.DuplexServiceReference {
         [System.ServiceModel.OperationContractAttribute(Action="http://tempuri.org/IDuplex/Join", ReplyAction="http://tempuri.org/IDuplex/JoinResponse")]
         ClientApp.DuplexServiceReference.ClientData Join(string name);
         
-        [System.ServiceModel.OperationContractAttribute(IsOneWay=true, Action="http://tempuri.org/IDuplex/TestService")]
-        void TestService();
-        
         [System.ServiceModel.OperationContractAttribute(IsOneWay=true, Action="http://tempuri.org/IDuplex/SendResult")]
         void SendResult(ClientApp.DuplexServiceReference.ClientData clientData);
         
@@ -198,6 +211,9 @@ namespace ClientApp.DuplexServiceReference {
         
         [System.ServiceModel.OperationContractAttribute(IsOneWay=true, Action="http://tempuri.org/IDuplex/JoinAccept")]
         void JoinAccept();
+        
+        [System.ServiceModel.OperationContractAttribute(IsOneWay=true, Action="http://tempuri.org/IDuplex/Reset")]
+        void Reset();
     }
     
     [System.CodeDom.Compiler.GeneratedCodeAttribute("System.ServiceModel", "4.0.0.0")]
@@ -230,10 +246,6 @@ namespace ClientApp.DuplexServiceReference {
         
         public ClientApp.DuplexServiceReference.ClientData Join(string name) {
             return base.Channel.Join(name);
-        }
-        
-        public void TestService() {
-            base.Channel.TestService();
         }
         
         public void SendResult(ClientApp.DuplexServiceReference.ClientData clientData) {

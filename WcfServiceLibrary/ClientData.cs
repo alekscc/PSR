@@ -23,7 +23,9 @@ namespace WcfServiceLibrary
         public int bestVertice;
         [DataMember]
         public int bestDistance;
-
+        [DataMember]
+        public long time;
+    
 
         private IDuplexCallback callback;
         private bool isDataReady;
