@@ -22,12 +22,10 @@ namespace ClientApp
 
         public class CallbackHandler : IDuplexCallback
         {
-            private bool isCalled;
             private int[][] matrix;
             private ClientData data = null;
             private BestResult bestResult;
             private bool isBestResult = false;
-            private bool mutStatus = false;
             private bool isDone = false;
             private int vertsCounter = 0;
   
@@ -51,7 +49,7 @@ namespace ClientApp
 
             public int Test()
             {
-                Console.WriteLine("Testing conncetion");
+                Console.WriteLine("Test");
                 return 1;
             }
 
@@ -59,7 +57,7 @@ namespace ClientApp
             {
                 this.matrix = matrix;
 
-                Console.WriteLine("Matrix length:{0}", matrix.Length);
+                Console.WriteLine("Rozmiar macierzy:{0}", matrix.Length);
                 return matrix.Length;
             }
             public bool IsBestResult
@@ -92,10 +90,10 @@ namespace ClientApp
                     ConcurrentProgram concurrent = new ConcurrentProgram(this.data.numberOfThreads, this.matrix,this.data.listOfVertices);
                     long time = 0;
                     vertsCounter += concurrent.Start(out time);
-                    Console.WriteLine("Ilość obliczonych wierzchołków dla kliena:{0}", vertsCounter);
+                    //Console.WriteLine("Ilość obliczonych wierzchołków dla kliena:{0}", vertsCounter);
                     this.bestResult.distance = concurrent.RecordResult;
                     this.bestResult.vertice = concurrent.RecordVertice;
-                    Console.WriteLine("najlepszy wierzcholek:{0}", concurrent.RecordVertice);
+                    //Console.WriteLine("najlepszy wierzcholek:{0}", concurrent.RecordVertice);
                     this.data.bestDistance = bestResult.distance;
                     this.data.bestVertice = bestResult.vertice;
                     this.data.time = time;
@@ -131,14 +129,6 @@ namespace ClientApp
             public void Reset()
             {
                 vertsCounter = 0;
-            }
-
-            public bool IsCalled
-            {
-                get
-                {
-                    return isCalled;
-                }
             }
             public ClientData ClientData
             {
@@ -224,9 +214,9 @@ namespace ClientApp
                 if (callbackHandler.IsBestResult)
                 {
                     if (isDelayed) Thread.Sleep(10000);
-                    Console.WriteLine("Przygotowywanie do wysłania.");
+                    //Console.WriteLine("Przygotowywanie do wysłania.");
                     client.SendResult(callbackHandler.ClientData);
-                    Console.WriteLine("Dane wysłane do hosta.");
+             //       Console.WriteLine("Dane wysłane do hosta.");
                 }
 
                 mre2.WaitOne();

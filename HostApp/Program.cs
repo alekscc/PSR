@@ -67,13 +67,15 @@ namespace HostApp
                     }
                     else if(cmd.CompareTo("brief")==0)
                     {
+                        Console.Write("Nazwa pliku:");
+                        string fileName = Console.ReadLine();
                         Console.Write("Ilość wątków:");
                         string line = Console.ReadLine();
                         int num = int.Parse(line);
                         Console.Write("Ilość wierzchołków w pakiecie:");
                         string numberOfVertsInPacket = Console.ReadLine();
 
-                        instance.BriefAllClients(num,int.Parse(numberOfVertsInPacket));
+                        instance.BriefAllClients(num,int.Parse(numberOfVertsInPacket),fileName);
                     }
                     else if(cmd.CompareTo("start")==0)
                     {

@@ -71,7 +71,7 @@ namespace ClientApp
             // var elapsedMiliseconds = watch.ElapsedMilliseconds;
             //  Console.WriteLine("Czas całkowity:" + elapsedMiliseconds + "ms "+czas);
 
-            Console.WriteLine("Czas całkowity: "+time+" nanosec");
+            //Console.WriteLine("Czas całkowity: "+time+" nanosec");
             // czas wyknania algorytmu dla klienta - koniec
             return sharedGraph.GetNumberOfVertices-sharedGraph.GetVertices-1;
         }
@@ -97,8 +97,8 @@ namespace ClientApp
             while (vertice >= 0)
             {
                 int sum = runDijkstraAlghoritm(vertice);
-               // Console.WriteLine("Łączna długość najkrótszych ścieżek: " + "wierzchołek:" + vertice + " dystans:" + sum);
-               // Console.WriteLine("Łączna długość najkrótszych ścieżek: " + "wierzchołek:" + vertice + " dystans:" + sum);
+              
+               //Console.WriteLine("Łączna długość najkrótszych ścieżek: " + "wierzchołek:" + vertice + " dystans:" + sum);
                 if (recordDist > sum)
                 {
                     recordDist = sum;

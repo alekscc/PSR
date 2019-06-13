@@ -26,12 +26,33 @@ namespace WcfServiceLibrary
         private int locRecordVert = -1;
         private int locRecordDist = 1;
         private long totalTime=0;
-
-
+        private long dataSyncTime = 0;
+        private long comTime = 0;
+        private DateTime timeStart;
+        private DateTime timeStop;
+        private TimeSpan interval;
+        private bool isDone=false;
         
         public Client(ClientData data)
         {
             this.data = data;
+        }
+        public void StartTimeCounting()
+        {
+            timeStart = DateTime.Now;
+        }
+        public void StopTimeCounting()
+        {
+            timeStop = DateTime.Now;
+            interval = timeStop - timeStart;
+            comTime= (interval.Ticks * 100)-totalTime;
+        }
+        public long CommunicationTime
+        {
+            get
+            {
+                return comTime;
+            }
         }
         public ClientData Data
         {
@@ -78,6 +99,8 @@ namespace WcfServiceLibrary
             locRecordVert = -1;
             locRecordDist = -1;
             totalTime = 0;
+            comTime = 0;
+            isDone = false;
         }
         public int RecordVertice
         {
@@ -93,8 +116,10 @@ namespace WcfServiceLibrary
                 return locRecordDist;
             }
         }
-
+      
         public long TotalTime { get => totalTime; set => totalTime = value; }
+        public long DataSyncTime { get => dataSyncTime; set => dataSyncTime = value; }
+        public bool IsDone { get => isDone; set => isDone = value; }
     }
 
     // NOTE: You can use the "Rename" command on the "Refactor" menu to change the class name "Service1" in both code and config file together.
@@ -110,8 +135,9 @@ namespace WcfServiceLibrary
         private int numberOfClientsDone;
         private bool isWaiting = false;
         private VerticesManagement verticesMgmt = new VerticesManagement();
-        public int recordVert = -1;
-        public int recordDist = -1;
+        private int recordVert = -1;
+        private int recordDist = -1;
+        private string fileName="test.csv";
         // czas calkowity
         DateTime startTotalTime;
         DateTime stopTotalTime;
@@ -124,7 +150,7 @@ namespace WcfServiceLibrary
         private int numberOfVertsPerClient = 1;
         private int numberOfThreads = 1;
         private System.Timers.Timer[] timers;
-        private float timeoutInterval = 60000;
+        private float timeoutInterval = 240000;
 
         public Duplex()
         {
@@ -197,10 +223,11 @@ namespace WcfServiceLibrary
                     {
                         stop = DateTime.Now;
                         interval = stop - start;
-                        long czas = interval.Ticks * 100;
+                        long time = interval.Ticks * 100;
 
-                        Console.Write(" " + czas + " nanosec ");
+                        Console.Write(" " + time + " nanosec ");
                         Console.WriteLine("OK");
+                        listOfClients[i].DataSyncTime = time;
                         c.IsDataReady = true;
 
                     }
@@ -212,7 +239,7 @@ namespace WcfServiceLibrary
                     Console.WriteLine("Błąd połączenia z {0} ID={1}, usunięcie klienta.", c.Name, c.Identifier);
                     listOfClients.Remove(listOfClients[i]);
                 }
-
+                
 
             }
             
@@ -227,10 +254,11 @@ namespace WcfServiceLibrary
             }
             Console.WriteLine("Najlepszy wynik to, wierzchołek:{0} dystans:{1}", recordVert, recordDist);
         }
-        public void BriefAllClients(int numberOfthreads,int numberOfVertsInPacket)
+        public void BriefAllClients(int numberOfthreads,int numberOfVertsInPacket,string fileName)
         {
             this.numberOfVertsPerClient = numberOfVertsInPacket;
             this.numberOfThreads = numberOfThreads;
+            this.fileName = fileName;
 
             if (stage == STAGE_TYPE.DATA_SYNC)
             {
@@ -261,12 +289,12 @@ namespace WcfServiceLibrary
             }
             return sub;
         }
-        private void _Brief(int numberOfthreads,int vertsPerClient)
+        private void _Brief(int numberOfthreads,int vertsPerClients)
         {
             Printer.PrintInfo("Odprawa klientów");
-
             recordDist = -1;
             recordVert = -1;
+            
 
 
             int numberOfClients = listOfClients.Count;
@@ -297,7 +325,7 @@ namespace WcfServiceLibrary
             {
                 listOfClients[i].Data.Callback.Reset();
                 listOfClients[i].ClearRecord();
-                listOfClients[i].Data.ListOfVertices = verticesMgmt.GetVertices(vertsPerClient);
+                listOfClients[i].Data.ListOfVertices = verticesMgmt.GetVertices(numberOfVertsPerClient);
                 listOfClients[i].Data.numberOfThreads = numberOfthreads;
                 //listOfClients[i].Callback.SendData(c);
             }
@@ -466,6 +494,7 @@ namespace WcfServiceLibrary
             {
                  
                 ClientData c = listOfClients[i].Data;
+                listOfClients[i].StartTimeCounting();
 
                 try
                 {
@@ -561,7 +590,7 @@ namespace WcfServiceLibrary
                 {
                     if (clientData.bestDistance == 0) continue;
 
-                    Console.WriteLine("Otrzymałem wynik od {0} najkrótszy dystans to:{1} dla wierzchołka {2}", clientData.id, clientData.bestDistance,clientData.bestVertice);
+                    //Console.WriteLine("Otrzymałem wynik od {0} najkrótszy dystans to:{1} dla wierzchołka {2}", clientData.id, clientData.bestDistance,clientData.bestVertice);
                     verticesMgmt.SubmitVertices(listOfClients[i].Data.listOfVertices);
 
                     listOfClients[i].TotalTime += clientData.time;
@@ -596,29 +625,77 @@ namespace WcfServiceLibrary
                     {
                         listOfClients[i].StopTimer();
                         listOfClients[i].IsFree = true;
+                        listOfClients[i].StopTimeCounting();
                         //listOfClients[i].Data.Callback.JoinAccept();
                         
                         Console.WriteLine("Lista jest pusta");
-                        if(++clientsDone == listOfClients.Count)
+                        Console.WriteLine("Liczba skonczonych klientow:{0}, wszyscy klienci:{1}", clientsDone, listOfClients.Count);
+                        bool isAllDone = true;
+                        if (!listOfClients[i].IsDone)
+                        {
+                            listOfClients[i].IsDone = true;
+
+                            ++clientsDone;
+                            Console.WriteLine("Liczba klientow skonczonych:{0}", clientsDone);
+
+                            foreach(Client cli in listOfClients)
+                            {
+                                if (!cli.IsDone)
+                                {
+                                    isAllDone = false;
+                                    break;
+                                }
+                                    
+                            }
+
+                        }
+
+
+
+                        if (isAllDone)
                         {
                             Console.WriteLine("Progam zakonczony");
                             stopTotalTime = DateTime.Now;
                             intervalTotalTime = stopTotalTime - startTotalTime;
                             totalTime = intervalTotalTime.Ticks * 100;
-                            Console.WriteLine("Czas całkowiy:"+ totalTime);
+
                             long clientsTotalTime = 0;
-                            foreach(Client c in listOfClients)
+                            long clientsComTime = 0;
+                            foreach (Client c in listOfClients)
                             {
                                 clientsTotalTime += c.TotalTime;
+                                clientsComTime += c.CommunicationTime;
                             }
                             Console.WriteLine("Czas algorytmu:" + clientsTotalTime);
-                            long commTotalTime = (totalTime - clientsTotalTime);
+                            long commTotalTime = clientsComTime;
                             Console.WriteLine("czas komunikacji:" + commTotalTime);
+                            totalTime = commTotalTime + clientsTotalTime;
+                            Console.WriteLine("Czas całkowiy:" + totalTime);
+                            FileStream fileStream = new FileStream(fileName, FileMode.Create, FileAccess.ReadWrite);
+                            StreamWriter w = new StreamWriter(fileStream, Encoding.UTF8);
+                            w.WriteLine("Ilosc wierzchołków;ilość watkow;ilosc klientow;wielkosc pakietu;czas calk.;czas kom.;czas alg.;rekord nr.;rekord dystans");
+                            w.WriteLine(matrix.Length + ";" + numberOfThreads + ";" + clientsDone + ";" + numberOfVertsPerClient + ";" + totalTime + ";" + commTotalTime + ";" + clientsTotalTime + ";" + recordVert + ";" + recordDist);
+                            /*            for (int i = 0; i < rozmiar; i++)
+                                        {
+                                            for (int j = 0; j < rozmiar; j++)
+                                            {
+                                                if (j < rozmiar - 1)
+                                                    w.Write(matrix[i, j] + " ");
+                                                else
+                                                    w.WriteLine(matrix[i, j]);
+                                            }
+                                        }
+                                        */
+                            w.Close();
+                            fileStream.Close();
 
-                            FileStream fileStream = new FileStream("wyniki.csv", FileMode.Create, FileAccess.ReadWrite);
-                            StreamWriter w = new StreamWriter(fileStream,Encoding.UTF8);
-                            w.WriteLine("Ilosc wierzchołków;ilość watkow;ilosc klientow;wielkosc pakietu;czas calk.;czas kom.;czas alg.");
-                            w.WriteLine(matrix.Length + ";" + numberOfThreads + ";" + clientsDone + ";" + numberOfVertsPerClient + ";" + totalTime + ";" + commTotalTime + ";" + clientsTotalTime);
+                            fileStream = new FileStream("workers_" + fileName, FileMode.Create, FileAccess.ReadWrite);
+                            w = new StreamWriter(fileStream, Encoding.UTF8);
+                            w.WriteLine("klient id.;klient nazwa;czas synch. danych;czas alg.;czas kom.;wierzcholek nr.;wierzcholek dystans");
+                            foreach (Client c in listOfClients)
+                            {
+                                w.WriteLine(c.Data.Identifier + ";" + c.Data.Name + ";" + c.DataSyncTime + ";" + c.TotalTime + ";" + c.CommunicationTime + ";" + c.RecordVertice + ";" + c.RecordDistance);
+                            }
                             /*            for (int i = 0; i < rozmiar; i++)
                                         {
                                             for (int j = 0; j < rozmiar; j++)
@@ -634,6 +711,7 @@ namespace WcfServiceLibrary
                             fileStream.Close();
 
                         }
+                        else Console.WriteLine("nie wszyscy klienci gotowi");
                     }
                 }
             }
@@ -654,7 +732,7 @@ namespace WcfServiceLibrary
                             listOfClients[i].bestDistance = clientData.bestDistance;
                             listOfClients[i].bestVertice = clientData.bestVertice;
                             if (++numberOfClientsDone == listOfClients.Count)
-                            {
+                            
                                 timer.Enabled = false;
                                 foreach(ClientData c in listOfClients)
                                 {
