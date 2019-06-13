@@ -17,8 +17,7 @@ namespace WcfServiceLibrary
         void SendResult(ClientData clientData);
         [OperationContract(IsOneWay = false)]
         int[][] GetMatrixData();
-        [OperationContract(IsOneWay = false)]
-        void SetStage(STAGE_TYPE type);
+      
 
 
     }

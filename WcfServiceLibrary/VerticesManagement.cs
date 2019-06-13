@@ -119,6 +119,15 @@ namespace WcfServiceLibrary
         {
             return listOfVertices.Count;
         }
+        public int GetNumberOfFreeVertices()
+        {
+            int n = 0;
+
+            foreach (Vertice v in listOfVertices)
+                if (v.Free()) n++;
+
+            return n;
+        }
         
         public int[] GetVertices(int n)
         {

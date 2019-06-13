@@ -55,6 +55,7 @@
     <Reference Include="System.Xml.Linq" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Client.cs" />
     <Compile Include="ClientData.cs" />
     <Compile Include="ClientsManagement.cs" />
     <Compile Include="IDuplex.cs" />

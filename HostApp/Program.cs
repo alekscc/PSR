@@ -53,10 +53,10 @@ namespace HostApp
                     cmd = Console.ReadLine();
 
 
-                    if(cmd.CompareTo("join")==0)
+                    if(cmd.CompareTo("open")==0)
                     {
                         //instance.SetStage(STAGE_TYPE.JOIN);
-                        instance.JoinClients();
+                        instance.OpenForClients();
                     }
                     else if(cmd.CompareTo("datasync")==0)
                     {
@@ -79,10 +79,16 @@ namespace HostApp
                     }
                     else if(cmd.CompareTo("start")==0)
                     {
-                        Console.WriteLine("Uruchamiam algorytm u klientów");
                         instance.Execute();
                     }
+                    else if(cmd.CompareTo("settimeout")==0)
+                    {
+                        Console.Write("Czas timeout w minutach:");
+                        string line = Console.ReadLine();
+                        int mins = int.Parse(line);
 
+                        instance.SetTimeout(mins);
+                    }
                     else if(cmd.CompareTo("stats")==0)
                     {
                         instance.Stats();

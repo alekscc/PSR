@@ -22,6 +22,7 @@ namespace ClientApp
         //private int lowestDist = 99999;
        // private int verticeNum = -1;
         private Record record;
+        private bool isNoRecord = true;
         private readonly object block = new object();
 
         public int[][] Matrix
@@ -65,10 +66,17 @@ namespace ClientApp
         }  
         public void SetRecord(int vert,int dist)
         {
+
             lock (block)
             {
-                record.distance = dist;
+                if (isNoRecord)
+                {
+                    isNoRecord = false;
+                }
+                else if (dist >= record.distance) return;
+
                 record.vertice = vert;
+                record.distance = dist;
             }
         }
         public int RecordVertice
