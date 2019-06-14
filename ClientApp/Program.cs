@@ -161,7 +161,7 @@ namespace ClientApp
             bool isDelayed = false;
 
 
-
+            Console.WriteLine("KLIENT");
             Console.Write("Adress:");
             DuplexClient client = new DuplexClient(instanceContext);
 

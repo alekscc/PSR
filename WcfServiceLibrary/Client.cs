@@ -104,6 +104,10 @@ namespace WcfServiceLibrary
                 return locRecordDist;
             }
         }
+        public void AddTotalTime(long val)
+        {
+            totalTime += val;
+        }
 
         public long TotalTime { get => totalTime; set => totalTime = value; }
         public long DataSyncTime { get => dataSyncTime; set => dataSyncTime = value; }

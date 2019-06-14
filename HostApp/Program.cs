@@ -20,7 +20,8 @@ namespace HostApp
             ServiceHost selfHost = new ServiceHost(typeof(Duplex),
                                                     baseAddress);
 
-            Console.WriteLine("Adres hosta:{0}", selfHost.BaseAddresses[0]);
+            Console.WriteLine("HOST");
+            Console.WriteLine("Adres host:{0}", selfHost.BaseAddresses[0]);
 
             try
             {
@@ -54,8 +55,9 @@ namespace HostApp
                 {
                     cmd = Console.ReadLine();
 
+                   
 
-                    if(cmd.CompareTo("open")==0)
+                    if (cmd.CompareTo("open")==0)
                     {
                         //instance.SetStage(STAGE_TYPE.JOIN);
                         instance.OpenForClients();

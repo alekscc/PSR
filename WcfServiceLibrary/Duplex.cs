@@ -359,7 +359,7 @@ namespace WcfServiceLibrary
                     //Console.WriteLine("Otrzymałem wynik od {0} najkrótszy dystans to:{1} dla wierzchołka {2}", clientData.id, clientData.bestDistance,clientData.bestVertice);
                     verticesMgmt.SubmitVertices(listOfClients[i].Data.listOfVertices);
 
-                    listOfClients[i].TotalTime += clientData.time;
+                    listOfClients[i].AddTotalTime(clientData.time);
 
                     listOfClients[i].SetRecord(clientData.recordVert, clientData.recordDist);
 
