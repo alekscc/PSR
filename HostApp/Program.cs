@@ -28,6 +28,8 @@ namespace HostApp
                 WSDualHttpBinding binding = new WSDualHttpBinding();
                
                 binding.Security.Mode = WSDualHttpSecurityMode.None;
+                binding.Security.Message.ClientCredentialType = MessageCredentialType.None;
+                binding.OpenTimeout = new TimeSpan(0, 30, 0);
 
                 selfHost.AddServiceEndpoint(typeof(IDuplex),
                     binding, "DuplexService");
