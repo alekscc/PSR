@@ -212,7 +212,7 @@ namespace ClientApp
 
             do
             {
-                Console.WriteLine("oczekiwanie na sygnal rozpoczecia");
+               // Console.WriteLine("oczekiwanie na sygnal rozpoczecia");
                 mre.WaitOne();
                 //mre.Reset();
                 //Thread.Sleep(1000);
@@ -227,7 +227,7 @@ namespace ClientApp
              //       Console.WriteLine("Dane wysłane do hosta.");
                 }
                 callbackHandler.SendingDone();
-                Console.WriteLine("oczekiwanie na koniec");
+                //Console.WriteLine("oczekiwanie na koniec");
                 mre2.WaitOne();
                 //Thread.Sleep(2000);
 
