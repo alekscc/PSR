@@ -73,9 +73,9 @@ namespace ClientApp
 
             public void StartWork()
             {
-
-                mre2.Set();
-                mre2.Reset();
+                
+                //mre2.Set();
+              //  mre2.Reset();
 
                 isDone = false;
                 if(this.matrix==null)
@@ -104,10 +104,16 @@ namespace ClientApp
                 else Console.WriteLine("Brak danych o kliencie.");
 
                 //SecuredSingleton.GetInstance().Release();
+                mre2.Reset();
                 mre.Set();
-                mre.Reset();
+             //   mre.Reset();
                 Console.WriteLine("Praca skończona");
 
+            }
+            public void SendingDone()
+            {
+                mre.Reset();
+                mre2.Set();
             }
 
             public void JoinAccept()
@@ -118,11 +124,12 @@ namespace ClientApp
                 //SecuredSingleton.GetInstance().Wait();
                 //mut.WaitOne();
                 IsDone = true;
-                mre.Set();
-                mre.Reset();
+                /*  mre.Set();
+                    mre.Reset();
+                */
 
                 mre2.Set();
-                mre2.Reset();
+
                 Console.WriteLine("Połączenie zakończone");
 
             }
@@ -205,7 +212,7 @@ namespace ClientApp
 
             do
             {
-
+                Console.WriteLine("oczekiwanie na sygnal rozpoczecia");
                 mre.WaitOne();
                 //mre.Reset();
                 //Thread.Sleep(1000);
@@ -219,7 +226,8 @@ namespace ClientApp
                     client.SendResult(callbackHandler.ClientData);
              //       Console.WriteLine("Dane wysłane do hosta.");
                 }
-
+                callbackHandler.SendingDone();
+                Console.WriteLine("oczekiwanie na koniec");
                 mre2.WaitOne();
                 //Thread.Sleep(2000);
 

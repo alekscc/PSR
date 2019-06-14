@@ -91,14 +91,14 @@ namespace ClientApp
             //Console.WriteLine("WĄTEK WĄTEK");
             int recordVert = vertice;
             int recordDist = runDijkstraAlghoritm(vertice);
-           // Console.WriteLine("Łączna długość najkrótszych ścieżek: " + "wierzchołek:" + vertice + " dystans:" + recordDist);
+            Console.WriteLine("Łączna długość najkrótszych ścieżek: " + "wierzchołek:" + vertice + " dystans:" + recordDist);
             vertice = sharedGraph.GetNextVertice;
 
             while (vertice >= 0)
             {
                 int sum = runDijkstraAlghoritm(vertice);
               
-               //Console.WriteLine("Łączna długość najkrótszych ścieżek: " + "wierzchołek:" + vertice + " dystans:" + sum);
+               Console.WriteLine("Łączna długość najkrótszych ścieżek: " + "wierzchołek:" + vertice + " dystans:" + sum);
                 if (recordDist > sum)
                 {
                     recordDist = sum;
