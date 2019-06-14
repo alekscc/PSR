@@ -20,9 +20,9 @@ namespace WcfServiceLibrary
         [DataMember]
         public int[] listOfVertices;
         [DataMember]
-        public int bestVertice;
+        public int recordVert;
         [DataMember]
-        public int bestDistance;
+        public int recordDist;
         [DataMember]
         public long time;
     
@@ -47,11 +47,11 @@ namespace WcfServiceLibrary
         }
         public int VerticeId
         {
-            get { return bestVertice; }
+            get { return recordVert; }
         }
         public int VerticeDist
         {
-            get { return bestDistance; }
+            get { return recordDist; }
         }
         public int[] ListOfVertices
         {

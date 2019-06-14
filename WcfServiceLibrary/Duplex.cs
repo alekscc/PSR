@@ -72,8 +72,8 @@ namespace WcfServiceLibrary
                 IDuplexCallback callback = OperationContext.Current.GetCallbackChannel<IDuplexCallback>();
                 ClientData data = new ClientData(name, listOfClients.Count, 2, null);
                 data.Callback = callback;
-                data.bestDistance = -1;
-                data.bestVertice = -1;
+                data.recordDist = -1;
+                data.recordVert = -1;
                 listOfClients.Add(new Client(data));
                 //clientsMgmt.AddClient(data);
 
@@ -354,25 +354,25 @@ namespace WcfServiceLibrary
                
                 if(listOfClients[i].Data.Identifier ==clientData.id)
                 {
-                    if (clientData.bestDistance == 0) continue;
+                    if (clientData.recordDist == 0) continue;
 
                     //Console.WriteLine("Otrzymałem wynik od {0} najkrótszy dystans to:{1} dla wierzchołka {2}", clientData.id, clientData.bestDistance,clientData.bestVertice);
                     verticesMgmt.SubmitVertices(listOfClients[i].Data.listOfVertices);
 
                     listOfClients[i].TotalTime += clientData.time;
 
-                    listOfClients[i].SetRecord(clientData.bestVertice, clientData.bestDistance);
+                    listOfClients[i].SetRecord(clientData.recordVert, clientData.recordDist);
 
                     if(recordVert==-1)
                     {
-                        recordVert = clientData.bestVertice;
-                        recordDist = clientData.bestDistance;
+                        recordVert = clientData.recordVert;
+                        recordDist = clientData.recordDist;
                         Printer.PrintRecord(recordVert, recordDist);
                     }
-                    else if (recordDist > clientData.bestDistance)
+                    else if (recordDist > clientData.recordDist)
                     {
-                        recordVert = clientData.bestVertice;
-                        recordDist = clientData.bestDistance;
+                        recordVert = clientData.recordVert;
+                        recordDist = clientData.recordDist;
                         Printer.PrintRecord(recordVert, recordDist);
                     }
                    
@@ -446,10 +446,11 @@ namespace WcfServiceLibrary
 
                             fileStream = new FileStream("workers_" + fileName, FileMode.Create, FileAccess.ReadWrite);
                             w = new StreamWriter(fileStream, Encoding.UTF8);
-                            w.WriteLine("klient id.;klient nazwa;czas synch. danych;czas alg.;czas kom.;wierzcholek nr.;wierzcholek dystans");
+                            w.WriteLine("klient id.;klient nazwa;czas synch. danych;czas całk.;czas kom.;czas alg.;wierzcholek nr.;wierzcholek dystans");
                             foreach (Client c in listOfClients)
                             {
-                                w.WriteLine(c.Data.Identifier + ";" + c.Data.Name + ";" + c.DataSyncTime + ";" + c.TotalTime + ";" + c.CommunicationTime + ";" + c.RecordVertice + ";" + c.RecordDistance);
+                                long algTime = c.TotalTime - c.CommunicationTime;
+                                w.WriteLine(c.Data.Identifier + ";" + c.Data.Name + ";" + c.DataSyncTime + ";" + c.TotalTime + ";" + c.CommunicationTime + ";"+ algTime + ";" + c.RecordVertice + ";" + c.RecordDistance);
                             }
 
                             w.Close();

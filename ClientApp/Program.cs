@@ -95,8 +95,8 @@ namespace ClientApp
                     this.record.distance = concurrent.RecordResult;
                     this.record.vertice = concurrent.RecordVertice;
                     //Console.WriteLine("najlepszy wierzcholek:{0}", concurrent.RecordVertice);
-                    this.data.bestDistance = record.distance;
-                    this.data.bestVertice = record.vertice;
+                    this.data.recordDist = record.distance;
+                    this.data.recordVert = record.vertice;
                     this.data.time = time;
                     isBestResult = true;
 

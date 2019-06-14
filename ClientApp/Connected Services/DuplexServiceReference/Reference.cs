@@ -23,12 +23,6 @@ namespace ClientApp.DuplexServiceReference {
         private System.Runtime.Serialization.ExtensionDataObject extensionDataField;
         
         [System.Runtime.Serialization.OptionalFieldAttribute()]
-        private int bestDistanceField;
-        
-        [System.Runtime.Serialization.OptionalFieldAttribute()]
-        private int bestVerticeField;
-        
-        [System.Runtime.Serialization.OptionalFieldAttribute()]
         private int idField;
         
         [System.Runtime.Serialization.OptionalFieldAttribute()]
@@ -41,6 +35,12 @@ namespace ClientApp.DuplexServiceReference {
         private int numberOfThreadsField;
         
         [System.Runtime.Serialization.OptionalFieldAttribute()]
+        private int recordDistField;
+        
+        [System.Runtime.Serialization.OptionalFieldAttribute()]
+        private int recordVertField;
+        
+        [System.Runtime.Serialization.OptionalFieldAttribute()]
         private long timeField;
         
         [global::System.ComponentModel.BrowsableAttribute(false)]
@@ -50,32 +50,6 @@ namespace ClientApp.DuplexServiceReference {
             }
             set {
                 this.extensionDataField = value;
-            }
-        }
-        
-        [System.Runtime.Serialization.DataMemberAttribute()]
-        public int bestDistance {
-            get {
-                return this.bestDistanceField;
-            }
-            set {
-                if ((this.bestDistanceField.Equals(value) != true)) {
-                    this.bestDistanceField = value;
-                    this.RaisePropertyChanged("bestDistance");
-                }
-            }
-        }
-        
-        [System.Runtime.Serialization.DataMemberAttribute()]
-        public int bestVertice {
-            get {
-                return this.bestVerticeField;
-            }
-            set {
-                if ((this.bestVerticeField.Equals(value) != true)) {
-                    this.bestVerticeField = value;
-                    this.RaisePropertyChanged("bestVertice");
-                }
             }
         }
         
@@ -132,6 +106,32 @@ namespace ClientApp.DuplexServiceReference {
         }
         
         [System.Runtime.Serialization.DataMemberAttribute()]
+        public int recordDist {
+            get {
+                return this.recordDistField;
+            }
+            set {
+                if ((this.recordDistField.Equals(value) != true)) {
+                    this.recordDistField = value;
+                    this.RaisePropertyChanged("recordDist");
+                }
+            }
+        }
+        
+        [System.Runtime.Serialization.DataMemberAttribute()]
+        public int recordVert {
+            get {
+                return this.recordVertField;
+            }
+            set {
+                if ((this.recordVertField.Equals(value) != true)) {
+                    this.recordVertField = value;
+                    this.RaisePropertyChanged("recordVert");
+                }
+            }
+        }
+        
+        [System.Runtime.Serialization.DataMemberAttribute()]
         public long time {
             get {
                 return this.timeField;
@@ -154,26 +154,6 @@ namespace ClientApp.DuplexServiceReference {
         }
     }
     
-    [System.CodeDom.Compiler.GeneratedCodeAttribute("System.Runtime.Serialization", "4.0.0.0")]
-    [System.Runtime.Serialization.DataContractAttribute(Name="STAGE_TYPE", Namespace="http://schemas.datacontract.org/2004/07/WcfServiceLibrary")]
-    public enum STAGE_TYPE : int {
-        
-        [System.Runtime.Serialization.EnumMemberAttribute()]
-        JOIN = 0,
-        
-        [System.Runtime.Serialization.EnumMemberAttribute()]
-        DATA_SYNC = 1,
-        
-        [System.Runtime.Serialization.EnumMemberAttribute()]
-        BRIEF = 2,
-        
-        [System.Runtime.Serialization.EnumMemberAttribute()]
-        EXECUTE = 3,
-        
-        [System.Runtime.Serialization.EnumMemberAttribute()]
-        STATS = 4,
-    }
-    
     [System.CodeDom.Compiler.GeneratedCodeAttribute("System.ServiceModel", "4.0.0.0")]
     [System.ServiceModel.ServiceContractAttribute(ConfigurationName="DuplexServiceReference.IDuplex", CallbackContract=typeof(ClientApp.DuplexServiceReference.IDuplexCallback), SessionMode=System.ServiceModel.SessionMode.Required)]
     public interface IDuplex {
@@ -186,9 +166,6 @@ namespace ClientApp.DuplexServiceReference {
         
         [System.ServiceModel.OperationContractAttribute(Action="http://tempuri.org/IDuplex/GetMatrixData", ReplyAction="http://tempuri.org/IDuplex/GetMatrixDataResponse")]
         int[][] GetMatrixData();
-        
-        [System.ServiceModel.OperationContractAttribute(Action="http://tempuri.org/IDuplex/SetStage", ReplyAction="http://tempuri.org/IDuplex/SetStageResponse")]
-        void SetStage(ClientApp.DuplexServiceReference.STAGE_TYPE type);
     }
     
     [System.CodeDom.Compiler.GeneratedCodeAttribute("System.ServiceModel", "4.0.0.0")]
@@ -254,10 +231,6 @@ namespace ClientApp.DuplexServiceReference {
         
         public int[][] GetMatrixData() {
             return base.Channel.GetMatrixData();
-        }
-        
-        public void SetStage(ClientApp.DuplexServiceReference.STAGE_TYPE type) {
-            base.Channel.SetStage(type);
         }
     }
 }

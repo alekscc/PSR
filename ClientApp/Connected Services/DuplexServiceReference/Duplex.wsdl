@@ -36,12 +36,6 @@
   <wsdl:message name="IDuplex_GetMatrixData_OutputMessage">
     <wsdl:part name="parameters" element="tns:GetMatrixDataResponse" />
   </wsdl:message>
-  <wsdl:message name="IDuplex_SetStage_InputMessage">
-    <wsdl:part name="parameters" element="tns:SetStage" />
-  </wsdl:message>
-  <wsdl:message name="IDuplex_SetStage_OutputMessage">
-    <wsdl:part name="parameters" element="tns:SetStageResponse" />
-  </wsdl:message>
   <wsdl:message name="IDuplex_Test_OutputCallbackMessage">
     <wsdl:part name="parameters" element="tns:Test" />
   </wsdl:message>
@@ -80,10 +74,6 @@
     <wsdl:operation msc:isInitiating="true" msc:isTerminating="false" name="GetMatrixData">
       <wsdl:input wsaw:Action="http://tempuri.org/IDuplex/GetMatrixData" message="tns:IDuplex_GetMatrixData_InputMessage" />
       <wsdl:output wsaw:Action="http://tempuri.org/IDuplex/GetMatrixDataResponse" message="tns:IDuplex_GetMatrixData_OutputMessage" />
-    </wsdl:operation>
-    <wsdl:operation msc:isInitiating="true" msc:isTerminating="false" name="SetStage">
-      <wsdl:input wsaw:Action="http://tempuri.org/IDuplex/SetStage" message="tns:IDuplex_SetStage_InputMessage" />
-      <wsdl:output wsaw:Action="http://tempuri.org/IDuplex/SetStageResponse" message="tns:IDuplex_SetStage_OutputMessage" />
     </wsdl:operation>
     <wsdl:operation msc:isInitiating="true" msc:isTerminating="false" name="Test">
       <wsdl:output wsaw:Action="http://tempuri.org/IDuplex/Test" message="tns:IDuplex_Test_OutputCallbackMessage" />
@@ -129,15 +119,6 @@
     </wsdl:operation>
     <wsdl:operation name="GetMatrixData">
       <soap12:operation soapAction="http://tempuri.org/IDuplex/GetMatrixData" style="document" />
-      <wsdl:input>
-        <soap12:body use="literal" />
-      </wsdl:input>
-      <wsdl:output>
-        <soap12:body use="literal" />
-      </wsdl:output>
-    </wsdl:operation>
-    <wsdl:operation name="SetStage">
-      <soap12:operation soapAction="http://tempuri.org/IDuplex/SetStage" style="document" />
       <wsdl:input>
         <soap12:body use="literal" />
       </wsdl:input>
