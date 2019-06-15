@@ -44,8 +44,10 @@ namespace ClientApp
             {
                 Console.WriteLine("Odebrano dane od hosta");
                 data = clientData;
+                Thread.Sleep(2000);
                TimeSpan interval = DateTime.Now - data.date;
-                data.commTime += interval.Ticks * 100;
+                data.commTime = interval.Ticks * 100;
+                Console.WriteLine("Kom. czas:"+data.commTime);
                 StartWork();
             }
 

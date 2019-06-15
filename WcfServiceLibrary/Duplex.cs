@@ -231,6 +231,7 @@ namespace WcfServiceLibrary
                 listOfClients[i].Data.ListOfVertices = verticesMgmt.GetVertices(numberOfVertsPerClient);
                 listOfClients[i].Data.numberOfThreads = numberOfthreads;
                 listOfClients[i].Data.commTime = 0;
+                listOfClients[i].Data.time = 0;
                 //listOfClients[i].Callback.SendData(c);
             }
 
@@ -369,13 +370,12 @@ namespace WcfServiceLibrary
                 {
                     if (clientData.recordDist == 0) continue;
                     TimeSpan inter = DateTime.Now - clientData.date;
-                    listOfClients[i].Data.commTime += inter.Ticks * 100;
+                    listOfClients[i].Data.commTime += inter.Ticks * 100 + clientData.commTime;
                     listOfClients[i].UnPauseTimeCounting();
                     //Console.WriteLine("Otrzymałem wynik od {0} najkrótszy dystans to:{1} dla wierzchołka {2}", clientData.id, clientData.bestDistance,clientData.bestVertice);
                     verticesMgmt.SubmitVertices(listOfClients[i].Data.listOfVertices);
 
                     listOfClients[i].AddTotalTime(clientData.time);
-
                     listOfClients[i].SetRecord(clientData.recordVert, clientData.recordDist);
 
                     if(recordVert==-1)
@@ -463,7 +463,7 @@ namespace WcfServiceLibrary
                             Console.WriteLine("Średni czas algorytmu:" + clientsTotalTime);
                            // long commTotalTime = clientsMaintainTime;
                             clientsMaintainTime /= numberOfClients;
-                            Console.WriteLine("Średni czas osbsługi:" + clientsMaintainTime);
+                            Console.WriteLine("Średni czas obsługi:" + clientsMaintainTime);
                             Console.WriteLine("Średni czas kom:" + clientsCommTime);
                             //totalTime = commTotalTime + clientsTotalTime;
                             Console.WriteLine("Czas całkowity:" + totalTime);
