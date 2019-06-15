@@ -19,6 +19,7 @@ namespace WcfServiceLibrary
         private DateTime timeStart;
         private DateTime timeStop;
         private TimeSpan interval;
+        private long ctime = 0;
         private bool isDone = false;
 
         public Client(ClientData data)
@@ -28,12 +29,26 @@ namespace WcfServiceLibrary
         public void StartTimeCounting()
         {
             timeStart = DateTime.Now;
+            interval = TimeSpan.Zero;
+            ctime = 0;
+
         }
         public void StopTimeCounting()
         {
             timeStop = DateTime.Now;
             interval = timeStop - timeStart;
-            comTime = (interval.Ticks * 100) - totalTime;
+            comTime = ctime + interval.Ticks * 100;
+            //comTime = (interval.Ticks * 100) - totalTime;
+        }
+        public void PauseTimeCounting()
+        {
+            timeStop = DateTime.Now;
+            interval =  timeStop - timeStart;
+            ctime += interval.Ticks * 100;
+        }
+        public void UnPauseTimeCounting()
+        {
+            timeStart = DateTime.Now;
         }
         public long CommunicationTime
         {

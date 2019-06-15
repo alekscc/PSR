@@ -60,7 +60,7 @@ namespace WcfServiceLibrary
             serviceHostInterface.SingletonInstance = this;
             Console.WriteLine("Instacja serwisu jest gotowa.");
             //callback = OperationContext.Current.GetCallbackChannel<IDuplexCallback>();
-
+             
 
 
         }
@@ -197,7 +197,7 @@ namespace WcfServiceLibrary
 
             recordDist = -1;
             recordVert = -1;
-
+            clientsDone = 0;
 
 
             int numberOfClients = listOfClients.Count;
@@ -304,14 +304,20 @@ namespace WcfServiceLibrary
             {
                  
                 ClientData c = listOfClients[i].Data;
-                listOfClients[i].StartTimeCounting();
+                
 
                 try
                 {
+                    listOfClients[i].StartTimeCounting();
                     c.Callback.SendData(c);
+                    
+                        Console.WriteLine("Wysłano do {0}", c.Identifier);
+                        listOfClients[i].SetTimer(OnTimeEvent, timeoutInterval);
+                    
+                    
                     //listOfClients[i].SetTimer(OnTimeEvent, timeoutInterval);
-                    Console.WriteLine("Wysłano do {0}", c.Identifier);
-                    listOfClients[i].SetTimer(OnTimeEvent, timeoutInterval);
+     
+                    
                 }
                 catch (TimeoutException toe)
                 {
@@ -321,7 +327,9 @@ namespace WcfServiceLibrary
                 {
                     Printer.PrintWarn("Błąd komunikacji");
                 }
-                
+
+                listOfClients[i].PauseTimeCounting();
+
             }
             Printer.PrintInfo("Uruchomiono algorytm");
 
@@ -355,7 +363,7 @@ namespace WcfServiceLibrary
                 if(listOfClients[i].Data.Identifier ==clientData.id)
                 {
                     if (clientData.recordDist == 0) continue;
-
+                    listOfClients[i].UnPauseTimeCounting();
                     //Console.WriteLine("Otrzymałem wynik od {0} najkrótszy dystans to:{1} dla wierzchołka {2}", clientData.id, clientData.bestDistance,clientData.bestVertice);
                     verticesMgmt.SubmitVertices(listOfClients[i].Data.listOfVertices);
 
@@ -384,7 +392,11 @@ namespace WcfServiceLibrary
                         listOfClients[i].Data.listOfVertices = verticesMgmt.GetVertices(numberOfVertsPerClient);
 
                         listOfClients[i].Data.Callback.SendData(listOfClients[i].Data);
-                        listOfClients[i].IsFree = false;
+                        
+                            listOfClients[i].IsFree = false;
+                            //Console.WriteLine("Wysłałem wierzcholek do klienta {0}", listOfClients[i].Data.Identifier);
+                            listOfClients[i].PauseTimeCounting();
+                        
 
                     }
                     else
@@ -429,17 +441,21 @@ namespace WcfServiceLibrary
                             foreach (Client c in listOfClients)
                             {
                                 clientsComTime += c.CommunicationTime;
+                                clientsTotalTime += c.TotalTime;
                             }
-                            clientsTotalTime = totalTime - clientsComTime;
-                            Console.WriteLine("Czas algorytmu:" + clientsTotalTime);
+                            int numberOfClients = clientsDone + 1;
+                            clientsTotalTime /= numberOfClients;
+                            //clientsTotalTime = totalTime - clientsComTime;
+                            Console.WriteLine("Średni czas algorytmu:" + clientsTotalTime);
                             long commTotalTime = clientsComTime;
                             Console.WriteLine("czas komunikacji:" + commTotalTime);
                             //totalTime = commTotalTime + clientsTotalTime;
                             Console.WriteLine("Czas całkowiy:" + totalTime);
                             FileStream fileStream = new FileStream(fileName, FileMode.Create, FileAccess.ReadWrite);
                             StreamWriter w = new StreamWriter(fileStream, Encoding.UTF8);
-                            w.WriteLine("Ilosc wierzchołków;ilość watkow;ilosc klientow;wielkosc pakietu;czas calk.;czas kom.;czas alg.;rekord nr.;rekord dystans");
-                            w.WriteLine(matrix.Length + ";" + numberOfThreads + ";" + clientsDone + ";" + numberOfVertsPerClient + ";" + totalTime + ";" + commTotalTime + ";" + clientsTotalTime + ";" + recordVert + ";" + recordDist);
+                            
+                            w.WriteLine("Ilosc wierzchołków;ilość watkow;ilosc klientow;wielkosc pakietu;czas calk.;czas kom.;śr. czas alg.;rekord nr.;rekord dystans");
+                            w.WriteLine(matrix.Length + ";" + numberOfThreads + ";" + numberOfClients + ";" + numberOfVertsPerClient + ";" + totalTime + ";" + commTotalTime + ";" + clientsTotalTime + ";" + recordVert + ";" + recordDist);
  
                             w.Close();
                             fileStream.Close();
@@ -449,8 +465,8 @@ namespace WcfServiceLibrary
                             w.WriteLine("klient id.;klient nazwa;czas synch. danych;czas całk.;czas kom.;czas alg.;wierzcholek nr.;wierzcholek dystans");
                             foreach (Client c in listOfClients)
                             {
-                                long algTime = c.TotalTime - c.CommunicationTime;
-                                w.WriteLine(c.Data.Identifier + ";" + c.Data.Name + ";" + c.DataSyncTime + ";" + c.TotalTime + ";" + c.CommunicationTime + ";"+ algTime + ";" + c.RecordVertice + ";" + c.RecordDistance);
+                                long time = c.TotalTime + c.CommunicationTime;
+                                w.WriteLine(c.Data.Identifier + ";" + c.Data.Name + ";" + c.DataSyncTime + ";" + time + ";" + c.CommunicationTime + ";"+ c.TotalTime + ";" + c.RecordVertice + ";" + c.RecordDistance);
                             }
 
                             w.Close();

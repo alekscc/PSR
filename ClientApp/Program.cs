@@ -45,7 +45,6 @@ namespace ClientApp
                 Console.WriteLine("Odebrano dane od hosta");
                 data = clientData;
                 StartWork();
-                
             }
 
             public int Test()
