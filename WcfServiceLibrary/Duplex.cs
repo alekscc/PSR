@@ -466,11 +466,13 @@ namespace WcfServiceLibrary
                             foreach (Client c in listOfClients)
                             {
                                 long time = c.TotalTime + c.CommunicationTime;
+                                Console.WriteLine("Czas całk. dla {0} to {1}", c.Data.Identifier, time);
                                 w.WriteLine(c.Data.Identifier + ";" + c.Data.Name + ";" + c.DataSyncTime + ";" + time + ";" + c.CommunicationTime + ";"+ c.TotalTime + ";" + c.RecordVertice + ";" + c.RecordDistance);
                             }
 
                             w.Close();
                             fileStream.Close();
+                            Console.WriteLine("Dane zapisane do {0} i {1}", fileName, "workers_" + fileName);
 
                         }
                         else Console.WriteLine("nie wszyscy klienci gotowi");
