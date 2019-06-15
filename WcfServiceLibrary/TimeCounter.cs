@@ -12,6 +12,7 @@ namespace WcfServiceLibrary
         private TimeSpan interval;
         private long time;
         private long totalTime;
+        private bool isPaused = false;
 
         public TimeCounter()
         {
@@ -23,22 +24,29 @@ namespace WcfServiceLibrary
             interval = TimeSpan.Zero;
             time = 0;
             totalTime = 0;
+            isPaused = false;
         }
         public void Stop()
         {
-            timeStop = DateTime.Now;
-            interval = timeStop - timeStart;
-            totalTime = time + interval.Ticks * 100;
+            if (!isPaused)
+            {
+                timeStop = DateTime.Now;
+                interval = timeStop - timeStart;
+                totalTime += interval.Ticks * 100;
+            }
+      
         }
         public void Pause()
         {
             timeStop = DateTime.Now;
             interval = timeStop - timeStart;
-            time += interval.Ticks * 100;
+            totalTime += interval.Ticks * 100;
+            isPaused = true;
         }
         public void Unpause()
         {
             timeStart = DateTime.Now;
+            isPaused = false;
         }
         public long GetTime()
         {

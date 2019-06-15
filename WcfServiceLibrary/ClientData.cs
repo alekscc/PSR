@@ -25,6 +25,10 @@ namespace WcfServiceLibrary
         public int recordDist;
         [DataMember]
         public long time;
+        [DataMember]
+        public long commTime;
+        [DataMember]
+        public DateTime date;
     
 
         private IDuplexCallback callback;

@@ -44,6 +44,8 @@ namespace ClientApp
             {
                 Console.WriteLine("Odebrano dane od hosta");
                 data = clientData;
+               TimeSpan interval = DateTime.Now - data.date;
+                data.commTime += interval.Ticks * 100;
                 StartWork();
             }
 
@@ -222,6 +224,7 @@ namespace ClientApp
                 {
                     if (isDelayed) Thread.Sleep(10000);
                     //Console.WriteLine("Przygotowywanie do wysłania.");
+                    callbackHandler.ClientData.date = DateTime.Now;
                     client.SendResult(callbackHandler.ClientData);
              //       Console.WriteLine("Dane wysłane do hosta.");
                 }

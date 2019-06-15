@@ -15,16 +15,18 @@ namespace WcfServiceLibrary
         private int locRecordDist = -1;
         private long totalTime = 0;
         private long dataSyncTime = 0;
-        private long comTime = 0;
+        private long maintainTime = 0;
         private DateTime timeStart;
         private DateTime timeStop;
         private TimeSpan interval;
         private long ctime = 0;
         private bool isDone = false;
+        public TimeCounter LifeTime;
 
         public Client(ClientData data)
         {
             this.data = data;
+            LifeTime = new TimeCounter();
         }
         public void StartTimeCounting()
         {
@@ -37,7 +39,7 @@ namespace WcfServiceLibrary
         {
             timeStop = DateTime.Now;
             interval = timeStop - timeStart;
-            comTime = ctime + interval.Ticks * 100;
+            maintainTime = ctime + interval.Ticks * 100;
             //comTime = (interval.Ticks * 100) - totalTime;
         }
         public void PauseTimeCounting()
@@ -45,16 +47,17 @@ namespace WcfServiceLibrary
             timeStop = DateTime.Now;
             interval =  timeStop - timeStart;
             ctime += interval.Ticks * 100;
+            timeStart = DateTime.Now;
         }
         public void UnPauseTimeCounting()
         {
             timeStart = DateTime.Now;
         }
-        public long CommunicationTime
+        public long MaintainTime
         {
             get
             {
-                return comTime;
+                return maintainTime;
             }
         }
         public ClientData Data
@@ -102,7 +105,7 @@ namespace WcfServiceLibrary
             locRecordVert = -1;
             locRecordDist = -1;
             totalTime = 0;
-            comTime = 0;
+            maintainTime = 0;
             isDone = false;
         }
         public int RecordVertice

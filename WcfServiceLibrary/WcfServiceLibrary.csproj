@@ -64,6 +64,7 @@
     <Compile Include="Duplex.cs" />
     <Compile Include="Properties\ServiceHostInterface.cs" />
     <Compile Include="ServiceHostInterface.cs" />
+    <Compile Include="TimeCounter.cs" />
     <Compile Include="VerticesManagement.cs" />
   </ItemGroup>
   <ItemGroup>

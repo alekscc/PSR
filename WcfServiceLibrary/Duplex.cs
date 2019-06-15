@@ -230,6 +230,7 @@ namespace WcfServiceLibrary
                 listOfClients[i].ClearRecord();
                 listOfClients[i].Data.ListOfVertices = verticesMgmt.GetVertices(numberOfVertsPerClient);
                 listOfClients[i].Data.numberOfThreads = numberOfthreads;
+                listOfClients[i].Data.commTime = 0;
                 //listOfClients[i].Callback.SendData(c);
             }
 
@@ -261,8 +262,10 @@ namespace WcfServiceLibrary
                             Printer.PrintInfo("Klient " + listOfClients[i].Data.Identifier + " przejmuje zadanie");
                             listOfClients[i].IsFree = false;
                             listOfClients[i].Data.listOfVertices = verticesMgmt.GetVertices(numberOfVertsPerClient);
+                            listOfClients[i].Data.date = DateTime.Now;
                             listOfClients[i].Data.Callback.SendData(listOfClients[i].Data);
                             listOfClients[i].SetTimer(OnTimeEvent, timeoutInterval);
+                            listOfClients[i].LifeTime.Unpause();
                             break;
                         }
                     }
@@ -308,12 +311,14 @@ namespace WcfServiceLibrary
 
                 try
                 {
+                    listOfClients[i].LifeTime.Start();
                     listOfClients[i].StartTimeCounting();
+                    listOfClients[i].Data.date = DateTime.Now;
+                    Console.WriteLine("Wysłano do {0}", c.Identifier);
+                    listOfClients[i].SetTimer(OnTimeEvent, timeoutInterval);
                     c.Callback.SendData(c);
                     
-                        Console.WriteLine("Wysłano do {0}", c.Identifier);
-                        listOfClients[i].SetTimer(OnTimeEvent, timeoutInterval);
-                    
+                 
                     
                     //listOfClients[i].SetTimer(OnTimeEvent, timeoutInterval);
      
@@ -363,6 +368,8 @@ namespace WcfServiceLibrary
                 if(listOfClients[i].Data.Identifier ==clientData.id)
                 {
                     if (clientData.recordDist == 0) continue;
+                    TimeSpan inter = DateTime.Now - clientData.date;
+                    listOfClients[i].Data.commTime += inter.Ticks * 100;
                     listOfClients[i].UnPauseTimeCounting();
                     //Console.WriteLine("Otrzymałem wynik od {0} najkrótszy dystans to:{1} dla wierzchołka {2}", clientData.id, clientData.bestDistance,clientData.bestVertice);
                     verticesMgmt.SubmitVertices(listOfClients[i].Data.listOfVertices);
@@ -390,7 +397,7 @@ namespace WcfServiceLibrary
 
                         listOfClients[i].SetTimer(OnTimeEvent, timeoutInterval);
                         listOfClients[i].Data.listOfVertices = verticesMgmt.GetVertices(numberOfVertsPerClient);
-
+                        listOfClients[i].Data.date = DateTime.Now;
                         listOfClients[i].Data.Callback.SendData(listOfClients[i].Data);
                         
                             listOfClients[i].IsFree = false;
@@ -412,6 +419,7 @@ namespace WcfServiceLibrary
                         if (!listOfClients[i].IsDone)
                         {
                             listOfClients[i].IsDone = true;
+                            listOfClients[i].LifeTime.Pause();
 
                             foreach(Client cli in listOfClients)
                             {
@@ -431,43 +439,51 @@ namespace WcfServiceLibrary
 
                         if (isAllDone)
                         {
+                    
+
+                            long clientsTotalTime = 0;
+                            long clientsMaintainTime = 0;
+                            long clientsCommTime = 0;
+                            foreach (Client c in listOfClients)
+                            {
+                                c.LifeTime.Stop();
+                                clientsMaintainTime += c.MaintainTime;
+                                clientsTotalTime += c.TotalTime;
+                                clientsCommTime += c.Data.commTime;
+                            }
                             Console.WriteLine("Progam zakonczony");
                             stopTotalTime = DateTime.Now;
                             intervalTotalTime = stopTotalTime - startTotalTime;
                             totalTime = intervalTotalTime.Ticks * 100;
 
-                            long clientsTotalTime = 0;
-                            long clientsComTime = 0;
-                            foreach (Client c in listOfClients)
-                            {
-                                clientsComTime += c.CommunicationTime;
-                                clientsTotalTime += c.TotalTime;
-                            }
                             int numberOfClients = clientsDone + 1;
                             clientsTotalTime /= numberOfClients;
+                            clientsCommTime /= numberOfClients;
                             //clientsTotalTime = totalTime - clientsComTime;
                             Console.WriteLine("Średni czas algorytmu:" + clientsTotalTime);
-                            long commTotalTime = clientsComTime;
-                            Console.WriteLine("czas komunikacji:" + commTotalTime);
+                           // long commTotalTime = clientsMaintainTime;
+                            clientsMaintainTime /= numberOfClients;
+                            Console.WriteLine("Średni czas osbsługi:" + clientsMaintainTime);
+                            Console.WriteLine("Średni czas kom:" + clientsCommTime);
                             //totalTime = commTotalTime + clientsTotalTime;
-                            Console.WriteLine("Czas całkowiy:" + totalTime);
+                            Console.WriteLine("Czas całkowity:" + totalTime);
                             FileStream fileStream = new FileStream(fileName, FileMode.Create, FileAccess.ReadWrite);
                             StreamWriter w = new StreamWriter(fileStream, Encoding.UTF8);
                             
-                            w.WriteLine("Ilosc wierzchołków;ilość watkow;ilosc klientow;wielkosc pakietu;czas calk.;czas kom.;śr. czas alg.;rekord nr.;rekord dystans");
-                            w.WriteLine(matrix.Length + ";" + numberOfThreads + ";" + numberOfClients + ";" + numberOfVertsPerClient + ";" + totalTime + ";" + commTotalTime + ";" + clientsTotalTime + ";" + recordVert + ";" + recordDist);
+                            w.WriteLine("Ilosc wierzchołków;ilość watkow;ilosc klientow;wielkosc pakietu;czas calk.;czas kom.;śr. czas alg.; śr. czas obsługi;rekord nr.;rekord dystans");
+                            w.WriteLine(matrix.Length + ";" + numberOfThreads + ";" + numberOfClients + ";" + numberOfVertsPerClient + ";" + totalTime + ";" + clientsCommTime + ";" + clientsTotalTime + ";"+clientsMaintainTime +";"+ recordVert + ";" + recordDist);
  
                             w.Close();
                             fileStream.Close();
 
                             fileStream = new FileStream("workers_" + fileName, FileMode.Create, FileAccess.ReadWrite);
                             w = new StreamWriter(fileStream, Encoding.UTF8);
-                            w.WriteLine("klient id.;klient nazwa;czas synch. danych;czas całk.;czas kom.;czas alg.;wierzcholek nr.;wierzcholek dystans");
+                            w.WriteLine("klient id.;klient nazwa;czas zycia;czas synch. danych;czas całk.;czas obsl.;czas kom.;czas alg.;wierzcholek nr.;wierzcholek dystans");
                             foreach (Client c in listOfClients)
                             {
-                                long time = c.TotalTime + c.CommunicationTime;
+                                long time = c.TotalTime + c.MaintainTime+c.Data.commTime;
                                 Console.WriteLine("Czas całk. dla {0} to {1}", c.Data.Identifier, time);
-                                w.WriteLine(c.Data.Identifier + ";" + c.Data.Name + ";" + c.DataSyncTime + ";" + time + ";" + c.CommunicationTime + ";"+ c.TotalTime + ";" + c.RecordVertice + ";" + c.RecordDistance);
+                                w.WriteLine(c.Data.Identifier + ";" + c.Data.Name + ";" + c.LifeTime.GetTime() +";"+ c.DataSyncTime + ";" + time + ";" + c.MaintainTime + ";" + c.Data.commTime + ";" + c.TotalTime + ";" + c.RecordVertice + ";" + c.RecordDistance);
                             }
 
                             w.Close();
