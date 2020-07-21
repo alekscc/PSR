@@ -51,7 +51,6 @@
     <Compile Include="DijkstraAlgorithm.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="SecuredSingleton.cs" />
     <Compile Include="SharedGraphData.cs" />
   </ItemGroup>
   <ItemGroup>
@@ -93,6 +92,11 @@
       <Generator>WCF Proxy Generator</Generator>
       <LastGenOutput>Reference.cs</LastGenOutput>
     </None>
+  </ItemGroup>
+  <ItemGroup />
+  <ItemGroup>
+    <Content Include="Screens\clientlogs.png" />
+    <Content Include="Screens\hostlogs.png" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

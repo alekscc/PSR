@@ -45,7 +45,6 @@ namespace ClientApp
             {
                 lock(block)
                 {
-                   // Console.WriteLine("current vert:" + curVertice);
                     return (curVertice >=0) ? vertices[curVertice--] : -1;
                 }
             }

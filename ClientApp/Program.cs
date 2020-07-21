@@ -40,16 +40,7 @@ namespace ClientApp
                 Console.WriteLine(message);
             }
 
-            public void SendData(ClientData clientData)
-            {
-                Console.WriteLine("Odebrano dane od hosta");
-                data = clientData;
-              
-               TimeSpan interval = DateTime.Now - data.date;
-                data.commTime = interval.Ticks * 100;
-                Console.WriteLine("Kom. czas:"+data.commTime);
-                StartWork();
-            }
+
 
             public int Test()
             {
@@ -72,14 +63,22 @@ namespace ClientApp
                 }
             }
 
-          
+            public void SendData(ClientData clientData)
+            {
+                Console.WriteLine("Odebrano dane od hosta");
+                data = clientData;
+                TimeSpan interval = DateTime.Now - data.date;
+                data.commTime = interval.Ticks * 100;
+                Console.WriteLine("Kom. czas:" + data.commTime);
+                StartWork();
+            }
 
             public void StartWork()
             {
-                
-                //mre2.Set();
-              //  mre2.Reset();
 
+                //mre2.Set();
+                //  mre2.Reset();
+                
                 isDone = false;
                 if(this.matrix==null)
                 {

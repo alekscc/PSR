@@ -11,7 +11,7 @@ namespace WcfServiceLibrary
     {
         JOIN,
         DATA_SYNC,
-        BRIEF,
+        BRIEFING,
         EXECUTE,
         
     }
@@ -69,17 +69,19 @@ namespace WcfServiceLibrary
             if (stage == STAGE_TYPE.JOIN)
             {
                 Printer.PrintInfo("Dołączył nowy klient - " + name);
-                IDuplexCallback callback = OperationContext.Current.GetCallbackChannel<IDuplexCallback>();
-                ClientData data = new ClientData(name, listOfClients.Count, 2, null);
+                IDuplexCallback callback = OperationContext
+                    .Current.GetCallbackChannel<IDuplexCallback>();
+                ClientData data = new ClientData(name,
+                                            listOfClients.Count,
+                                            2,
+                                            null);
                 data.Callback = callback;
                 data.recordDist = -1;
                 data.recordVert = -1;
                 listOfClients.Add(new Client(data));
-                //clientsMgmt.AddClient(data);
 
 
                 callback.Message("Dołączyłeś do hosta.");
-                //callback.JoinAccept();
                 return data;
             }
             Printer.PrintErr("Błąd połączenia z klientem");
@@ -111,9 +113,6 @@ namespace WcfServiceLibrary
             int len = this.matrix.Length;
 
             Printer.PrintInfo("Synchronizacja macierzy: " + len);
-            //clienMgmt.SyncMatrixData(matrix);
-
-            //clientsMgmt.SyncMatrixData(this.matrix);
 
             for (int i = 0; i < listOfClients.Count; i++)
             {
@@ -144,7 +143,8 @@ namespace WcfServiceLibrary
                 catch (TimeoutException ce)
                 {
                     Console.WriteLine("Timeout exception");
-                    Console.WriteLine("Błąd połączenia z {0} ID={1}, usunięcie klienta.", c.Name, c.Identifier);
+                    Console.WriteLine("Błąd połączenia z {0} ID={1}," +
+                        " usunięcie klienta.", c.Name, c.Identifier);
                     listOfClients.Remove(listOfClients[i]);
                 }
 
@@ -166,7 +166,7 @@ namespace WcfServiceLibrary
             if (stage == STAGE_TYPE.DATA_SYNC)
             {
                 _Brief(numberOfthreads, numberOfVertsPerClient);
-                //Brief(numberOfthreads, matrix.Length,generateArrayOfVertices(matrix.Length));
+               
             }
             else Console.WriteLine("Dane nie są zsynchronizowane");
 
@@ -199,7 +199,6 @@ namespace WcfServiceLibrary
             recordVert = -1;
             clientsDone = 0;
 
-
             int numberOfClients = listOfClients.Count;
             int matrixSize = matrix.Length;
 
@@ -216,23 +215,16 @@ namespace WcfServiceLibrary
                 Printer.PrintWarn("Brak klientów");
                 return;
             }
-            /*
-            foreach(var item in clientsMgmt.GetList())
-            {
-                clientsMgmt.SetTask(item.Data.Identifier,verticesMgmt.GetVertices(numberOfVertsPerClient),2000);
-            }
-            */
-
 
             for (int i = 0; i < listOfClients.Count; i++)
             {
                 listOfClients[i].Data.Callback.Reset();
                 listOfClients[i].ClearRecord();
-                listOfClients[i].Data.ListOfVertices = verticesMgmt.GetVertices(numberOfVertsPerClient);
+                listOfClients[i].Data.ListOfVertices = verticesMgmt
+                    .GetVertices(numberOfVertsPerClient);
                 listOfClients[i].Data.numberOfThreads = numberOfthreads;
                 listOfClients[i].Data.commTime = 0;
                 listOfClients[i].Data.time = 0;
-                //listOfClients[i].Callback.SendData(c);
             }
 
             Printer.PrintInfo("Wszystko gotowe. Wpisz start, aby rozpocząc");
@@ -250,9 +242,9 @@ namespace WcfServiceLibrary
                 if (c.GetTimer().Equals(timer))
                 {
                     Printer.PrintWarn("Timer:Usunołem klienta " + c.Data.Identifier);
-                    Console.WriteLine("ilosc wolnych wierzcholkow: {0}", verticesMgmt.GetNumberOfFreeVertices());
+                    //Console.WriteLine("ilosc wolnych wierzcholkow: {0}", verticesMgmt.GetNumberOfFreeVertices());
                     verticesMgmt.FreeVertices(c.Data.ListOfVertices);
-                    Console.WriteLine("ilosc wolnych wierzcholkow po free: {0}", verticesMgmt.GetNumberOfFreeVertices());
+                    //Console.WriteLine("ilosc wolnych wierzcholkow po free: {0}", verticesMgmt.GetNumberOfFreeVertices());
                     c.StopTimer();
                     listOfClients.Remove(c);
 
@@ -294,7 +286,7 @@ namespace WcfServiceLibrary
         public void Execute()
         {
 
-            if (stage != STAGE_TYPE.BRIEF && stage != STAGE_TYPE.EXECUTE)
+            if (stage != STAGE_TYPE.BRIEFING && stage != STAGE_TYPE.EXECUTE)
             {
                 Printer.PrintInfo("Użyj polecenia brief do przygotowania klientów");
             }
@@ -318,10 +310,6 @@ namespace WcfServiceLibrary
                     Console.WriteLine("Wysłano do {0}", c.Identifier);
                     listOfClients[i].SetTimer(OnTimeEvent, timeoutInterval);
                     c.Callback.SendData(c);
-                    
-                 
-                    
-                    //listOfClients[i].SetTimer(OnTimeEvent, timeoutInterval);
      
                     
                 }
@@ -362,7 +350,6 @@ namespace WcfServiceLibrary
         public void SendResult(ClientData clientData)
         {
 
-
             for (int i = 0; i < listOfClients.Count; i++)
             {
                
@@ -372,7 +359,6 @@ namespace WcfServiceLibrary
                     TimeSpan inter = DateTime.Now - clientData.date;
                     listOfClients[i].Data.commTime += inter.Ticks * 100 + clientData.commTime;
                     listOfClients[i].UnPauseTimeCounting();
-                    //Console.WriteLine("Otrzymałem wynik od {0} najkrótszy dystans to:{1} dla wierzchołka {2}", clientData.id, clientData.bestDistance,clientData.bestVertice);
                     verticesMgmt.SubmitVertices(listOfClients[i].Data.listOfVertices);
 
                     listOfClients[i].AddTotalTime(clientData.time);
